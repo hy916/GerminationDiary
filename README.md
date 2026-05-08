@@ -16,6 +16,7 @@
       <img src="https://img.shields.io/github/v/release/hy916/GerminationDiary?color=3b82f6" alt="Release" />
     </a>
     <img src="https://img.shields.io/badge/macOS-26%2B-363b44?logo=apple&logoColor=white" alt="macOS 14+" />
+    <img src="https://img.shields.io/badge/iOS-26%2B-363b44?logo=apple&logoColor=white" alt="iOS 26+" />
     <a href="https://jaywcjlove.github.io/maslink/?id=6758053530">
       <img src="https://img.shields.io/badge/Downloads-AppStore-363b44?logo=AppStore&logoColor=white" alt="Sprout Diary AppStore" />
     </a>
@@ -26,8 +27,11 @@
     <a href="./CHANGELOG.md">Changelog</a>
   </p>
   <p>
-    <a target="_blank" href="https://jaywcjlove.github.io/maslink/?id=6758053530" title="Sprout Diary for macOS">
-      <img alt="Sprout Diary AppStore" src="https://jaywcjlove.github.io/sb/download/macos.svg" height="51">
+    <a href="https://jaywcjlove.github.io/maslink/?id=6758053530">
+      <img src="https://img.shields.io/badge/Downloads-Android-363b44?logo=Android&logoColor=white" alt="萌芽日记 Android" />
+    </a>
+    <a href="https://jaywcjlove.github.io/maslink/?id=6758053530">
+      <img src="https://img.shields.io/badge/Downloads-iOS-363b44?logo=AppStore&logoColor=white" alt="萌芽日记 iOS" />
     </a>
   </p>
 </div>
