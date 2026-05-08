@@ -16,10 +16,10 @@
       <img src="https://img.shields.io/github/v/release/hy916/GerminationDiary?color=3b82f6" alt="Release" />
     </a>
     <a href="https://jaywcjlove.github.io/maslink/?id=6758053530">
-      <img src="https://img.shields.io/badge/Downloads-Android-363b44?logo=Android&logoColor=white" alt="萌芽日记 Android" />
+      <img src="https://img.shields.io/badge/Downloads-Android-363b44?logo=Android&logoColor=white" alt="Sprout Diary Android" />
     </a>
     <a href="https://jaywcjlove.github.io/maslink/?id=6758053530">
-      <img src="https://img.shields.io/badge/Downloads-iOS-363b44?logo=AppStore&logoColor=white" alt="萌芽日记 iOS" />
+      <img src="https://img.shields.io/badge/Downloads-iOS-363b44?logo=AppStore&logoColor=white" alt="Sprout Diary iOS" />
     </a>
   </p>
   <p>
@@ -29,21 +29,21 @@
   </p>
 </div>
 
-![](./assets/01.jpg)
+<img src="./assets/01.jpg" alt="Sprout Diary" />
 
-![](./assets/02.jpg)
+<img src="./assets/02.jpg" alt="Sprout Diary" />
 
-![](./assets/03.jpg)
+<img src="./assets/03.jpg" alt="Sprout Diary" />
 
-![](./assets/04.jpg)
+<img src="./assets/04.jpg" alt="Sprout Diary" />
 
-![](./assets/05.jpg)
+<img src="./assets/05.jpg" alt="Sprout Diary" />
 
-![](./assets/06.jpg)
+<img src="./assets/06.jpg" alt="Sprout Diary" />
 
-![](./assets/07.jpg)
+<img src="./assets/07.jpg" alt="Sprout Diary" />
 
-![](./assets/08.jpg)
+<img src="./assets/08.jpg" alt="Sprout Diary" />
 
 Sprout Diary is a parenting app designed for families with babies aged 0-3. It helps parents and caregivers record feeding, diaper logs, sleep, body status, and growth development in a structured timeline. The app focuses on reducing fragmented notes and making daily childcare records easier to track, review, and export when needed.
 
