@@ -16,9 +16,6 @@
       <img src="https://img.shields.io/github/v/release/hy916/GerminationDiary?color=3b82f6" alt="Release" />
     </a>
     <img src="https://img.shields.io/badge/macOS-26%2B-363b44?logo=apple&logoColor=white" alt="macOS 14+" />
-    <a href="https://jaywcjlove.github.io/maslink/?id=6758053530">
-      <img src="https://img.shields.io/badge/下载-AppStore-363b44?logo=AppStore&logoColor=white" alt="萌芽日记 AppStore" />
-    </a>
   </p>
   <p>
     <a href="./README.md">English</a> • 
@@ -30,7 +27,7 @@
       <img src="https://img.shields.io/badge/Downloads-Android-363b44?logo=Android&logoColor=white" alt="萌芽日记 Android" />
     </a>
     <a href="https://jaywcjlove.github.io/maslink/?id=6758053530">
-      <img src="https://img.shields.io/badge/Downloads-iOS-363b44?logo=AppStore&logoColor=white" alt="萌芽日记 iOS" />
+      <img src="https://img.shields.io/badge/Downloads-iOS-363b44?logo=iOS&logoColor=white" alt="萌芽日记 iOS" />
     </a>
   </p>
 </div>
