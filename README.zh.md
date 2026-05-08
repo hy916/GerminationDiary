@@ -6,7 +6,7 @@
 <!-- <div align="center"> -->
   <br />
   <br />
-  <img src="./assets/logo.png" width="160" height="160">
+  <img src="./assets/icon.png" width="160" height="160">
   <h1>
     萌芽日记
   </h1>
