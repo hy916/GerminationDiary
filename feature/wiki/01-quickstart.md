@@ -32,8 +32,8 @@ npm run web
 
 ## 项目入口
 
-- JS 入口：`index.js` 注册根组件 [index.js](file:///Users/huyi/GerminationDiary/index.js#L1-L8)
-- 根组件：`App.js` [App.js](file:///Users/huyi/GerminationDiary/App.js#L40-L218)
+- JS 入口：`index.js` 注册根组件 [index.js](file:///Users/huyi/SproutDiary/index.js#L1-L8)
+- 根组件：`App.js` [App.js](file:///Users/huyi/SproutDiary/App.js#L40-L218)
 
 ## 本项目的“运行时约束”
 

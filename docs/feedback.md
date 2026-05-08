@@ -18,6 +18,6 @@ If you need assistance while using Sprout Diary, please reach out through:
 
 - [**Email Support**: kennyiseeyou@gmail.com](mailto:kennyiseeyou@gmail.com)  
 - [**Social Media**: Twitter/X @jaywcjlove](https://twitter.com/jaywcjlove)  
-- [**GitHub Issue Tracker**](https://github.com/hy916/GerminationDiary/issues/new/choose)  
+- [**GitHub Issue Tracker**](https://github.com/hy916/SproutDiary/issues/new/choose)  
 
 We will reply as soon as possible. Thank you for your support and trust.  

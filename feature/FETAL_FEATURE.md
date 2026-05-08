@@ -91,7 +91,7 @@ log₁₀(EFW) = 1.3596 - 0.0056(AC) + 0.0107(HC) + 0.0438(BPD) + 0.158(FL)
 ## 文件结构
 
 ```
-/GerminationDiary
+/SproutDiary
 ├── screens/
 │   └── FetalScreen.js          # 孕期胎儿记录UI界面
 ├── utils/

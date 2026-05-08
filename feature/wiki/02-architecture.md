@@ -2,7 +2,7 @@
 
 ## 技术栈
 
-- Expo + React Native（应用框架）：[package.json](file:///Users/huyi/GerminationDiary/package.json#L1-L19)
+- Expo + React Native（应用框架）：[package.json](file:///Users/huyi/SproutDiary/package.json#L1-L19)
 - React（组件与状态）：`react@19.1.0`
 - 多媒体选择：`expo-image-picker`（相册/相机）
 
@@ -42,16 +42,16 @@ Expo Runtime
 ### App.js（应用壳 + 数据中心）
 
 - 维护应用核心状态
-  - `babies`: 多宝宝列表（每个宝宝内含各类记录数组与 pending 字段）[App.js](file:///Users/huyi/GerminationDiary/App.js#L13-L33)
-  - `selectedBabyId`: 当前宝宝选择 [App.js](file:///Users/huyi/GerminationDiary/App.js#L41-L46)
-  - `page`: 当前页面 [App.js](file:///Users/huyi/GerminationDiary/App.js#L41-L45)
+  - `babies`: 多宝宝列表（每个宝宝内含各类记录数组与 pending 字段）[App.js](file:///Users/huyi/SproutDiary/App.js#L13-L33)
+  - `selectedBabyId`: 当前宝宝选择 [App.js](file:///Users/huyi/SproutDiary/App.js#L41-L46)
+  - `page`: 当前页面 [App.js](file:///Users/huyi/SproutDiary/App.js#L41-L45)
 - 通过 props 将数据与回调下发到 Screen
   - “读”：`baby={currentBaby}`
   - “写”：`onAddX / onUpdateX / onDeleteX`、`onClearRecords`、`onUpdateBaby`
 - 负责页面切换
-  - `renderScreen()`：根据 `page` 字符串 switch 渲染 [App.js](file:///Users/huyi/GerminationDiary/App.js#L141-L204)
+  - `renderScreen()`：根据 `page` 字符串 switch 渲染 [App.js](file:///Users/huyi/SproutDiary/App.js#L141-L204)
 - 负责底部 Tab
-  - 仅提供“首页 / 我的”两项 [App.js](file:///Users/huyi/GerminationDiary/App.js#L35-L38)
+  - 仅提供“首页 / 我的”两项 [App.js](file:///Users/huyi/SproutDiary/App.js#L35-L38)
 
 ### screens（页面模块）
 

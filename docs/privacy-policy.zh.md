@@ -51,6 +51,6 @@
 
 如您对本隐私政策有任何疑问或需进一步协助，请通过以下方式联系我们：
 
-- [**GitHub 问题反馈**](https://github.com/hy916/GerminationDiary/issues/new/choose)  
+- [**GitHub 问题反馈**](https://github.com/hy916/SproutDiary/issues/new/choose)  
 
 本政策自 **2026 年 5 月 8 日** 起生效。

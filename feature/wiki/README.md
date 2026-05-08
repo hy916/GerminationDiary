@@ -1,6 +1,6 @@
-# GerminationDiary Code Wiki
+# SproutDiary Code Wiki
 
-这是一份面向开发者的代码级 Wiki，用于快速理解 GerminationDiary（宝宝成长记录）项目的架构、模块边界、数据模型与运行方式。
+这是一份面向开发者的代码级 Wiki，用于快速理解 SproutDiary（宝宝成长记录）项目的架构、模块边界、数据模型与运行方式。
 
 ## 导航
 

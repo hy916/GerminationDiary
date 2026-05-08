@@ -12,8 +12,8 @@
   </h1>
   <!--rehype:style=border: 0;-->
   <p>
-    <a href="https://github.com/hy916/GerminationDiary/releases">
-      <img src="https://img.shields.io/github/v/release/hy916/GerminationDiary?color=3b82f6" alt="Release" />
+    <a href="https://github.com/hy916/SproutDiary/releases">
+      <img src="https://img.shields.io/github/v/release/hy916/SproutDiary?color=3b82f6" alt="Release" />
     </a>
     <a href="https://jaywcjlove.github.io/maslink/?id=6758053530">
       <img src="https://img.shields.io/badge/Downloads-Android-363b44?logo=Android&logoColor=white" alt="萌芽日记 Android" />
@@ -24,7 +24,7 @@
   </p>
   <p>
     <a href="./README.md">English</a> • 
-    <a target="_blank" href="https://github.com/hy916/GerminationDiary/issues/new?template=bug_report_cn.yml">联系&支持</a> • 
+    <a target="_blank" href="https://github.com/hy916/SproutDiary/issues/new?template=bug_report_cn.yml">联系&支持</a> • 
     <a href="./CHANGELOG.zh.md">更新日志</a>
   </p>
 </div>

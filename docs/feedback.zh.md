@@ -14,6 +14,6 @@
 
 如果您在使用萌芽日记过程中需要帮助或遇到问题，可以通过以下渠道联系我们：  
 
-- [**GitHub 问题反馈**](https://github.com/hy916/GerminationDiary/issues/new/choose)  
+- [**GitHub 问题反馈**](https://github.com/hy916/SproutDiary/issues/new/choose)  
 
 我们会尽快回复您的消息。感谢您对萌芽日记的支持和信任。  

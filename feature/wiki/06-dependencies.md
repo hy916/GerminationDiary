@@ -2,11 +2,11 @@
 
 ## package.json
 
-文件：[package.json](file:///Users/huyi/GerminationDiary/package.json)
+文件：[package.json](file:///Users/huyi/SproutDiary/package.json)
 
 ### Scripts
 
-定义：[package.json](file:///Users/huyi/GerminationDiary/package.json#L6-L11)
+定义：[package.json](file:///Users/huyi/SproutDiary/package.json#L6-L11)
 
 - `npm run start`：启动 Expo 开发服务器（Metro Bundler）
 - `npm run android`：启动并尝试打开 Android（依赖本机 Android 环境）
@@ -15,7 +15,7 @@
 
 ### Dependencies
 
-定义：[package.json](file:///Users/huyi/GerminationDiary/package.json#L12-L18)
+定义：[package.json](file:///Users/huyi/SproutDiary/package.json#L12-L18)
 
 - `expo`：运行时与工程化能力
 - `react` / `react-native`：UI 框架
@@ -24,15 +24,15 @@
 
 ## Expo 配置（app.json）
 
-文件：[app.json](file:///Users/huyi/GerminationDiary/app.json)
+文件：[app.json](file:///Users/huyi/SproutDiary/app.json)
 
-- `name/slug/version`：应用元信息 [app.json](file:///Users/huyi/GerminationDiary/app.json#L2-L6)
-- `newArchEnabled: true`：启用 RN 新架构开关（依 Expo/RN 版本支持）[app.json](file:///Users/huyi/GerminationDiary/app.json#L8-L10)
-- `icon/splash/android.adaptiveIcon/web.favicon`：应用图标与启动图 [app.json](file:///Users/huyi/GerminationDiary/app.json#L7-L27)
+- `name/slug/version`：应用元信息 [app.json](file:///Users/huyi/SproutDiary/app.json#L2-L6)
+- `newArchEnabled: true`：启用 RN 新架构开关（依 Expo/RN 版本支持）[app.json](file:///Users/huyi/SproutDiary/app.json#L8-L10)
+- `icon/splash/android.adaptiveIcon/web.favicon`：应用图标与启动图 [app.json](file:///Users/huyi/SproutDiary/app.json#L7-L27)
 
 ## 静态资源（assets）
 
-目录：[assets/](file:///Users/huyi/GerminationDiary/assets)
+目录：[assets/](file:///Users/huyi/SproutDiary/assets)
 
 - `icon.png`：应用图标
 - `adaptive-icon.png`：Android 自适应图标前景

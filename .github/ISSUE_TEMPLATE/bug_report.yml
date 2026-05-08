@@ -1,6 +1,6 @@
-name: 🙋‍♂️ [GerminationDiary] - Support & Feedback
-description: Get help with GerminationDiary, report bugs, or request features.
-title: '🙋‍♂️ Support & Feedback: GerminationDiary'
+name: 🙋‍♂️ [SproutDiary] - Support & Feedback
+description: Get help with SproutDiary, report bugs, or request features.
+title: '🙋‍♂️ Support & Feedback: SproutDiary'
 labels: ['support', 'feedback', 'question']
 assignees:
   - jaywcjlove
@@ -8,9 +8,9 @@ body:
   - type: markdown
     attributes:
       value: |
-        <img align="right" height="86" alt="GerminationDiary" src="https://github.com/user-attachments/assets/965f303e-1c75-4a08-afc1-565ed5b9c06b"> Please provide as much detail as possible about your support request or feedback.
+        <img align="right" height="86" alt="SproutDiary" src="https://github.com/user-attachments/assets/965f303e-1c75-4a08-afc1-565ed5b9c06b"> Please provide as much detail as possible about your support request or feedback.
         
-        GerminationDiary is a professional macOS application designed specifically for image screenshot capture, annotation, and drawing board creation. It provides a focused editing canvas that integrates multiple powerful features, including drawing tools, blur/mosaic, spotlight, QR code overlay, watermark, and image layer pasting. In addition to robust editing capabilities, GerminationDiary supports editing existing images, a free creative drawing board mode, and a precise screenshot mode, helping users efficiently complete image processing tasks.
+        SproutDiary is a professional macOS application designed specifically for image screenshot capture, annotation, and drawing board creation. It provides a focused editing canvas that integrates multiple powerful features, including drawing tools, blur/mosaic, spotlight, QR code overlay, watermark, and image layer pasting. In addition to robust editing capabilities, SproutDiary supports editing existing images, a free creative drawing board mode, and a precise screenshot mode, helping users efficiently complete image processing tasks.
 
         ### Contact Information
 
