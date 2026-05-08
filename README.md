@@ -29,21 +29,21 @@
   </p>
 </div>
 
-<img src="./assets/01.jpg" alt="Sprout Diary" />
+<img src="./assets/01.jpg" width="230" alt="Sprout Diary" />
 
-<img src="./assets/02.jpg" alt="Sprout Diary" />
+<img src="./assets/02.jpg" width="230" alt="Sprout Diary" />
 
-<img src="./assets/03.jpg" alt="Sprout Diary" />
+<img src="./assets/03.jpg" width="230" alt="Sprout Diary" />
 
-<img src="./assets/04.jpg" alt="Sprout Diary" />
+<img src="./assets/04.jpg" width="230" alt="Sprout Diary" />
 
-<img src="./assets/05.jpg" alt="Sprout Diary" />
+<img src="./assets/05.jpg" width="230" alt="Sprout Diary" />
 
-<img src="./assets/06.jpg" alt="Sprout Diary" />
+<img src="./assets/06.jpg" width="230" alt="Sprout Diary" />
 
-<img src="./assets/07.jpg" alt="Sprout Diary" />
+<img src="./assets/07.jpg" width="230" alt="Sprout Diary" />
 
-<img src="./assets/08.jpg" alt="Sprout Diary" />
+<img src="./assets/08.jpg" width="230" alt="Sprout Diary" />
 
 Sprout Diary is a parenting app designed for families with babies aged 0-3. It helps parents and caregivers record feeding, diaper logs, sleep, body status, and growth development in a structured timeline. The app focuses on reducing fragmented notes and making daily childcare records easier to track, review, and export when needed.
 
