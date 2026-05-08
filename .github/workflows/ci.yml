@@ -47,7 +47,7 @@ jobs:
           openSource: https://github.com/hy916/GerminationDiary
           tocs: false
           element: 
-            wrapper: style=max-width:720px;
+            wrapper: style=max-width:745px;
           menus:
             Home: index.html
             About: https://github.com/hy916
