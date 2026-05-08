@@ -50,8 +50,7 @@ jobs:
             wrapper: style=max-width:720px;
           menus:
             Home: index.html
-            Apps: https://wangchujiang.com/#/app
-            About: https://wangchujiang.com/#/about
+            About: https://github.com/hy916
           sideEffectFiles:
             - README.md
             - README.zh.md
