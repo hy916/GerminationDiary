@@ -15,21 +15,17 @@
     <a href="https://github.com/hy916/GerminationDiary/releases">
       <img src="https://img.shields.io/github/v/release/hy916/GerminationDiary?color=3b82f6" alt="Release" />
     </a>
-    <img src="https://img.shields.io/badge/macOS-26%2B-363b44?logo=apple&logoColor=white" alt="macOS 14+" />
-    <img src="https://img.shields.io/badge/iOS-26%2B-363b44?logo=apple&logoColor=white" alt="iOS 26+" />
-  </p>
-  <p>
-    <a href="./README.zh.md">简体中文</a> • 
-    <a target="_blank" href="https://github.com/hy916/GerminationDiary/issues/new?template=bug_report.yml">Contact & Support</a> • 
-    <a href="./CHANGELOG.md">Changelog</a>
-  </p>
-  <p>
     <a href="https://jaywcjlove.github.io/maslink/?id=6758053530">
       <img src="https://img.shields.io/badge/Downloads-Android-363b44?logo=Android&logoColor=white" alt="萌芽日记 Android" />
     </a>
     <a href="https://jaywcjlove.github.io/maslink/?id=6758053530">
       <img src="https://img.shields.io/badge/Downloads-iOS-363b44?logo=AppStore&logoColor=white" alt="萌芽日记 iOS" />
     </a>
+  </p>
+  <p>
+    <a href="./README.zh.md">简体中文</a> • 
+    <a target="_blank" href="https://github.com/hy916/GerminationDiary/issues/new?template=bug_report.yml">Contact & Support</a> • 
+    <a href="./CHANGELOG.md">Changelog</a>
   </p>
 </div>
 
