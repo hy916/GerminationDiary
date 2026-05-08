@@ -37,7 +37,7 @@ jobs:
         run: |
           cat > idoc.yml << EOF
           site: "Sprout Diary {{version:${{ steps.create_tag.outputs.version }}}}"
-          description: Sprout Diary is a parenting app designed for families with babies aged 0-3. It helps parents and caregivers record feeding, diaper logs, sleep, body status, and growth development in a structured timeline. The app focuses on reducing fragmented notes and making daily childcare records easier to track, review, and export when needed.
+          description: Sprout Diary is a parenting app designed for families with babies aged 0-3. It helps parents and caregivers record feeding, diaper logs, sleep, body status, and growth development in a structured timeline.
           keywords: parenting, baby care, feeding, diaper logs, sleep tracking, growth development, childcare, family app
           favicon: assets/logo.png
           logo: ./assets/logo.png
