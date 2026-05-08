@@ -25,8 +25,8 @@ jobs:
           version: ${{ steps.create_tag.outputs.version }}
           release: true
           body: |
-            <a target="_blank" href="https://jaywcjlove.github.io/maslink/?id=6758053530" title="Scap for macOS">
-              <img alt="Scap AppStore" src="https://jaywcjlove.github.io/sb/download/macos.svg" height="51">
+            <a target="_blank" href="https://jaywcjlove.github.io/maslink/?id=6758053530" title="GerminationDiary for macOS">
+              <img alt="GerminationDiary AppStore" src="https://jaywcjlove.github.io/sb/download/macos.svg" height="51">
             </a>
 
       - name: Get latest tag
@@ -41,7 +41,7 @@ jobs:
           keywords: parenting, baby care, feeding, diaper logs, sleep tracking, growth development, childcare, family app
           favicon: assets/logo.png
           logo: ./assets/logo.png
-          openSource: https://github.com/jaywcjlove/scap
+          openSource: https://github.com/hy916/GerminationDiary
           tocs: false
           element: 
             wrapper: style=max-width:720px;

@@ -10,7 +10,7 @@ Changelog
 <img alt="Sprout Diary AppStore" src="https://jaywcjlove.github.io/sb/download/macos.svg" height="51">
 </a>
 
-## [v0.1.0](https://github.com/jaywcjlove/scap/releases)
+## [v0.1.0](https://github.com/hy916/GerminationDiary/releases)
 
 1. feat: add baby profile management with quick switching
 2. feat: add feeding records (breast/formula/solids) with night-feed tags and interval stats

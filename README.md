@@ -12,8 +12,8 @@
   </h1>
   <!--rehype:style=border: 0;-->
   <p>
-    <a href="https://github.com/jaywcjlove/scap/releases">
-      <img src="https://img.shields.io/github/v/release/jaywcjlove/scap?color=3b82f6" alt="Release" />
+    <a href="https://github.com/hy916/GerminationDiary/releases">
+      <img src="https://img.shields.io/github/v/release/hy916/GerminationDiary?color=3b82f6" alt="Release" />
     </a>
     <img src="https://img.shields.io/badge/macOS-26%2B-363b44?logo=apple&logoColor=white" alt="macOS 14+" />
     <a href="https://jaywcjlove.github.io/maslink/?id=6758053530">
@@ -22,7 +22,7 @@
   </p>
   <p>
     <a href="./README.zh.md">简体中文</a> • 
-    <a target="_blank" href="https://github.com/jaywcjlove/scap/issues/new?template=bug_report.yml">Contact & Support</a> • 
+    <a target="_blank" href="https://github.com/hy916/GerminationDiary/issues/new?template=bug_report.yml">Contact & Support</a> • 
     <a href="./CHANGELOG.md">Changelog</a>
   </p>
   <p>

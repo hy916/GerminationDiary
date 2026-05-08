@@ -10,7 +10,7 @@
 <img alt="萌芽日记 AppStore" src="https://jaywcjlove.github.io/sb/download/macos.svg" height="51">
 </a>
 
-## [v0.1.0](https://github.com/jaywcjlove/scap/releases)
+## [v0.1.0](https://github.com/hy916/GerminationDiary/releases)
 
 1. feat: 新增宝宝档案管理，支持多宝宝独立记录与快捷切换
 2. feat: 新增喂养记录（母乳/奶粉/辅食）与夜奶标记、喂养间隔统计
