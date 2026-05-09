@@ -1,9 +1,16 @@
 import React, { useState } from 'react';
-import { View, Text, StyleSheet, Pressable, TextInput, ScrollView, Alert, Modal, Image } from 'react-native';
+import { Alert, Image, Modal, Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
 import * as ImagePicker from 'expo-image-picker';
 import { formatDateTimeYYYYMMDDHHmm } from '../utils/timeUtils';
+import Screen from '../ui/components/Screen';
+import Card from '../ui/components/Card';
+import Button from '../ui/components/Button';
+import ImageStrip from '../ui/components/ImageStrip';
+import { getTheme } from '../ui/theme';
+import { fontSize, fontWeight, radius, space } from '../ui/tokens';
 
-export default function VaccineScreen({ baby, onAddVaccine, onUpdateVaccine, onDeleteVaccine }) {
+export default function VaccineScreen({ baby, onBack, onAddVaccine, onUpdateVaccine, onDeleteVaccine }) {
+  const theme = getTheme(baby);
   const [vaccineName, setVaccineName] = useState('');
   const [vaccinationDate, setVaccinationDate] = useState('');
   const [location, setLocation] = useState('');
@@ -11,7 +18,6 @@ export default function VaccineScreen({ baby, onAddVaccine, onUpdateVaccine, onD
   const [images, setImages] = useState([]);
   const [previewImage, setPreviewImage] = useState(null);
   const [editId, setEditId] = useState(null);
-  const themeColor = baby.gender === '女' ? '#F39AC3' : '#7BCEEA';
 
   const isEditing = !!editId;
 
@@ -102,276 +108,218 @@ export default function VaccineScreen({ baby, onAddVaccine, onUpdateVaccine, onD
   };
 
   return (
-    <ScrollView style={styles.page} contentContainerStyle={styles.contentContainer}>
-      <View style={styles.section}>
-        <Text style={styles.sectionTitle}>新增疫苗记录</Text>
-        <View style={styles.fieldRow}>
-          <Text style={styles.fieldLabel}>疫苗名称</Text>
-          <TextInput style={styles.fieldInput} value={vaccineName} onChangeText={setVaccineName} placeholder="如 百白破" />
-        </View>
-        <View style={styles.fieldRow}>
-          <Text style={styles.fieldLabel}>接种时间</Text>
-          <TextInput
-            style={styles.fieldInput}
-            value={vaccinationDate}
-            onChangeText={setVaccinationDate}
-            onFocus={handleDateFocus}
-            placeholder="点击自动填充当前时间"
-            editable={true}
-          />
-        </View>
-        <View style={styles.fieldRow}>
-          <Text style={styles.fieldLabel}>接种地点</Text>
-          <TextInput style={styles.fieldInput} value={location} onChangeText={setLocation} placeholder="如 儿保站" />
-        </View>
-        <View style={styles.fieldRow}>
-          <Text style={styles.fieldLabel}>备注</Text>
-          <View style={styles.noteRow}>
-            <TextInput style={[styles.fieldInput, styles.textArea, styles.noteInput]} value={note} onChangeText={setNote} placeholder="如 宝宝当日表现良好" multiline />
-            <Pressable style={[styles.imageButton, { backgroundColor: themeColor }]} onPress={selectImage}>
-              <Text style={styles.imageButtonText}>📷</Text>
-            </Pressable>
-          </View>
-        </View>
-        <Pressable style={[styles.saveButton, { backgroundColor: themeColor }]} onPress={submit}>
-          <Text style={styles.saveText}>{isEditing ? '保存修改' : '保存疫苗记录'}</Text>
-        </Pressable>
-        {isEditing && (
-          <Pressable style={styles.cancelButton} onPress={resetForm}>
-            <Text style={styles.cancelText}>取消编辑</Text>
-          </Pressable>
-        )}
-      </View>
+    <Screen baby={baby} title="疫苗" onBack={onBack}>
+      <ScrollView contentContainerStyle={styles.contentContainer}>
+        <Card baby={baby} style={styles.cardSpacing}>
+          <Text style={[styles.sectionTitle, { color: theme.colors.text }]}>新增疫苗记录</Text>
 
-      <View style={styles.section}>
-        <Text style={styles.sectionTitle}>疫苗历史</Text>
-        {baby.vaccineRecords.length === 0 ? (
-          <Text style={styles.emptyText}>暂无疫苗记录。</Text>
-        ) : (
-          baby.vaccineRecords.map((item) => (
-            <View key={item.id} style={styles.recordCard}>
-              <View style={styles.recordRow}>
-                <View style={styles.recordContent}>
-                  <Text style={styles.recordTitle}>{item.vaccineName} · {item.vaccinationDate}</Text>
-                  <Text style={styles.recordText}>{item.location || '接种地点未填'}</Text>
-                  <Text style={styles.recordNote}>{item.note || '暂无备注'}</Text>
-                  {item.images && item.images.length > 0 && (
-                    <Pressable style={styles.thumbnailContainer} onPress={() => setPreviewImage(item.images[0])}>
-                      <Image source={{ uri: item.images[0] }} style={styles.recordThumbnail} />
-                      {item.images.length > 1 && <Text style={styles.imageCount}>{item.images.length}张</Text>}
-                    </Pressable>
-                  )}
-                </View>
-                <View style={styles.recordActions}>
-                  <Pressable style={[styles.actionButton, styles.editAction]} onPress={() => handleEdit(item)}>
-                    <Text style={styles.actionButtonText}>编辑</Text>
-                  </Pressable>
-                  <Pressable style={[styles.actionButton, styles.deleteAction]} onPress={() => confirmDelete(item.id)}>
-                    <Text style={styles.actionButtonText}>删除</Text>
-                  </Pressable>
-                </View>
+          <View style={styles.fieldBlock}>
+            <Text style={[styles.fieldLabel, { color: theme.colors.textMuted }]}>疫苗名称</Text>
+            <TextInput
+              style={[styles.fieldInput, { backgroundColor: theme.colors.surfaceSoft, color: theme.colors.text }]}
+              value={vaccineName}
+              onChangeText={setVaccineName}
+              placeholder="如 百白破"
+              placeholderTextColor={theme.colors.placeholder}
+            />
+          </View>
+
+          <View style={styles.fieldBlock}>
+            <Text style={[styles.fieldLabel, { color: theme.colors.textMuted }]}>接种时间</Text>
+            <TextInput
+              style={[styles.fieldInput, { backgroundColor: theme.colors.surfaceSoft, color: theme.colors.text }]}
+              value={vaccinationDate}
+              onChangeText={setVaccinationDate}
+              onFocus={handleDateFocus}
+              placeholder="点击自动填充当前时间"
+              placeholderTextColor={theme.colors.placeholder}
+              editable={true}
+            />
+          </View>
+
+          <View style={styles.fieldBlock}>
+            <Text style={[styles.fieldLabel, { color: theme.colors.textMuted }]}>接种地点</Text>
+            <TextInput
+              style={[styles.fieldInput, { backgroundColor: theme.colors.surfaceSoft, color: theme.colors.text }]}
+              value={location}
+              onChangeText={setLocation}
+              placeholder="如 儿保站"
+              placeholderTextColor={theme.colors.placeholder}
+            />
+          </View>
+
+          <View style={styles.fieldBlock}>
+            <Text style={[styles.fieldLabel, { color: theme.colors.textMuted }]}>备注</Text>
+            <TextInput
+              style={[styles.fieldInput, styles.textArea, { backgroundColor: theme.colors.surfaceSoft, color: theme.colors.text }]}
+              value={note}
+              onChangeText={setNote}
+              placeholder="如 宝宝当日表现良好"
+              placeholderTextColor={theme.colors.placeholder}
+              multiline
+            />
+          </View>
+
+          <View style={styles.imageRow}>
+            <Text style={[styles.fieldLabel, { color: theme.colors.textMuted }]}>图片</Text>
+            <Button baby={baby} label="+ 添加" size="md" onPress={selectImage} style={styles.addImageBtn} />
+          </View>
+          <ImageStrip
+            baby={baby}
+            images={images}
+            onPressImage={(uri) => setPreviewImage(uri)}
+            onRemoveImage={(index) => setImages((prev) => prev.filter((_, i) => i !== index))}
+          />
+
+          <Button baby={baby} label={isEditing ? '保存修改' : '保存疫苗记录'} onPress={submit} />
+          {isEditing ? (
+            <Button baby={baby} label="取消编辑" variant="secondary" onPress={resetForm} style={styles.cancelBtn} />
+          ) : null}
+        </Card>
+
+        <Card baby={baby}>
+          <Text style={[styles.sectionTitle, { color: theme.colors.text }]}>疫苗历史</Text>
+          {baby.vaccineRecords.length === 0 ? (
+            <Text style={[styles.emptyText, { color: theme.colors.textSubtle }]}>暂无疫苗记录</Text>
+          ) : (
+            baby.vaccineRecords.map((item) => (
+              <Pressable
+                key={item.id}
+                onPress={() =>
+                  Alert.alert('记录操作', '请选择', [
+                    { text: '取消', style: 'cancel' },
+                    { text: '编辑', onPress: () => handleEdit(item) },
+                    { text: '删除', style: 'destructive', onPress: () => confirmDelete(item.id) },
+                  ])
+                }
+                style={[styles.recordItem, { backgroundColor: theme.colors.surfaceMuted }]}
+              >
+                <Text style={[styles.recordTitle, { color: theme.colors.text }]}>
+                  {item.vaccineName} · {item.vaccinationDate}
+                </Text>
+                <Text style={[styles.recordText, { color: theme.colors.textMuted }]}>{item.location || '接种地点未填'}</Text>
+                {item.note ? <Text style={[styles.recordNote, { color: theme.colors.textMuted }]}>备注：{item.note}</Text> : null}
+                {item.images?.length ? <ImageStrip baby={baby} images={item.images} onPressImage={setPreviewImage} /> : null}
+              </Pressable>
+            ))
+          )}
+
+          <Modal visible={!!previewImage} transparent animationType="fade">
+            <View style={styles.modalOverlay}>
+              <View style={styles.modalContent}>
+                <Pressable style={styles.modalClose} onPress={() => setPreviewImage(null)}>
+                  <Text style={[styles.modalCloseText, { color: theme.colors.text }]}>关闭</Text>
+                </Pressable>
+                {previewImage ? <Image source={{ uri: previewImage }} style={styles.modalImage} /> : null}
               </View>
             </View>
-          ))
-        )}
-        <Modal visible={!!previewImage} transparent animationType="fade">
-          <View style={styles.modalOverlay}>
-            <View style={styles.modalContent}>
-              <Pressable style={styles.modalClose} onPress={() => setPreviewImage(null)}>
-                <Text style={styles.modalCloseText}>关闭</Text>
-              </Pressable>
-              {previewImage && <Image source={{ uri: previewImage }} style={styles.modalImage} />}
-            </View>
-          </View>
-        </Modal>
-      </View>
-    </ScrollView>
+          </Modal>
+        </Card>
+      </ScrollView>
+    </Screen>
   );
 }
 
 const styles = StyleSheet.create({
-  page: {
-    marginTop: 40,
-    flex: 1,
-    backgroundColor: '#F8F4EE',
-  },
   contentContainer: {
-    padding: 16,
+    paddingBottom: space.xxl,
   },
-  section: {
-    backgroundColor: '#FFF',
-    borderRadius: 14,
-    padding: 16,
-    marginBottom: 16,
-    shadowColor: '#000',
-    shadowOpacity: 0.03,
-    shadowRadius: 8,
-    elevation: 2,
+  cardSpacing: {
+    marginBottom: space.lg,
   },
   sectionTitle: {
-    fontSize: 16,
-    fontWeight: '700',
-    color: '#4A403A',
-    marginBottom: 12,
+    fontSize: fontSize.xl,
+    fontWeight: fontWeight.bold,
+    marginBottom: space.md,
   },
-  fieldRow: {
-    marginBottom: 12,
+  fieldBlock: {
+    marginBottom: space.lg,
   },
   fieldLabel: {
-    marginBottom: 6,
-    color: '#6E5D52',
-    fontSize: 13,
+    fontSize: fontSize.md,
+    fontWeight: fontWeight.medium,
+    marginBottom: space.sm,
   },
   fieldInput: {
-    backgroundColor: '#F3ECE4',
-    borderRadius: 12,
-    padding: 12,
-    color: '#4A403A',
+    borderRadius: radius.lg,
+    paddingHorizontal: space.lg,
+    paddingVertical: 14,
+    fontSize: fontSize.md,
   },
   textArea: {
     minHeight: 80,
   },
-  noteRow: {
+  imageRow: {
     flexDirection: 'row',
-    alignItems: 'flex-end',
-    gap: 8,
-  },
-  noteInput: {
-    flex: 1,
-  },
-  imageButton: {
-    width: 48,
-    height: 48,
-    borderRadius: 8,
-    justifyContent: 'center',
+    justifyContent: 'space-between',
     alignItems: 'center',
+    marginBottom: space.lg,
   },
-  imageButtonText: {
-    fontSize: 20,
+  addImageBtn: {
+    paddingHorizontal: space.lg,
   },
-  saveButton: {
-    marginTop: 8,
-    paddingVertical: 14,
-    borderRadius: 14,
-    alignItems: 'center',
-  },
-  saveText: {
-    color: '#fff',
-    fontSize: 16,
-    fontWeight: '700',
+  cancelBtn: {
+    marginTop: space.md,
   },
   emptyText: {
-    color: '#9D8F86',
+    fontSize: fontSize.md,
+    fontWeight: fontWeight.medium,
   },
-  recordCard: {
-    backgroundColor: '#F9F6F2',
-    borderRadius: 12,
-    padding: 12,
-    marginBottom: 12,
-  },
-  recordRow: {
-    flexDirection: 'row',
-    alignItems: 'flex-start',
-    justifyContent: 'space-between',
-  },
-  recordContent: {
-    flex: 3,
-    marginRight: 12,
-  },
-  recordLeft: {
-    flex: 1,
-    marginRight: 10,
-  },
-  recordActions: {
-    width: 72,
-    justifyContent: 'space-between',
-  },
-  actionButton: {
-    borderRadius: 10,
-    minHeight: 30,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  editAction: {
-    backgroundColor: '#7BCEEA',
-        marginBottom:5,
-
-  },
-  deleteAction: {
-    backgroundColor: '#FF6B6B',
-  },
-  actionButtonText: {
-    color: '#fff',
-    fontSize: 12,
-    fontWeight: '700',
-  },
-  cancelButton: {
-    marginTop: 10,
-    backgroundColor: '#A08B7D',
-    borderRadius: 14,
-    paddingVertical: 14,
-    alignItems: 'center',
-  },
-  cancelText: {
-    color: '#fff',
-    fontSize: 14,
-    fontWeight: '600',
+  recordItem: {
+    borderRadius: radius.lg,
+    padding: space.lg,
+    marginBottom: space.md,
   },
   recordTitle: {
-    fontSize: 14,
-    fontWeight: '700',
-    color: '#4A403A',
-    marginBottom: 4,
+    fontSize: fontSize.lg,
+    fontWeight: fontWeight.bold,
+    marginBottom: space.sm,
   },
   recordText: {
-    color: '#7A6B62',
-    fontSize: 13,
+    fontSize: fontSize.md,
+    fontWeight: fontWeight.medium,
     marginBottom: 4,
   },
   recordNote: {
-    color: '#7A6B62',
-    fontSize: 13,
+    fontSize: fontSize.md,
+    fontWeight: fontWeight.medium,
   },
-  thumbnailContainer: {
-    alignItems: 'center',
+  thumbWrap: {
+    width: 120,
+    height: 90,
+    borderRadius: radius.lg,
+    overflow: 'hidden',
+    marginTop: space.md,
   },
-  recordThumbnail: {
-    width: 56,
-    height: 56,
-    borderRadius: 8,
-  },
-  imageCount: {
-    marginTop: 6,
-    fontSize: 12,
-    color: '#8B7C70',
+  thumb: {
+    width: '100%',
+    height: '100%',
   },
   modalOverlay: {
     flex: 1,
-    backgroundColor: 'rgba(0,0,0,0.8)',
+    backgroundColor: 'rgba(0,0,0,0.6)',
     justifyContent: 'center',
     alignItems: 'center',
+    padding: space.lg,
   },
   modalContent: {
-    width: '90%',
-    alignItems: 'center',
-  },
-  modalClose: {
-    alignSelf: 'flex-end',
+    width: '100%',
+    borderRadius: radius.xl,
     backgroundColor: '#fff',
-    paddingHorizontal: 12,
-    paddingVertical: 6,
-    borderRadius: 6,
-    marginBottom: 12,
-  },
-  modalCloseText: {
-    color: '#4A403A',
-    fontSize: 14,
-    fontWeight: '600',
+    padding: space.md,
+    alignItems: 'center',
   },
   modalImage: {
     width: '100%',
     height: 320,
-    resizeMode: 'contain',
-    borderRadius: 12,
+    borderRadius: radius.lg,
+  },
+  modalClose: {
+    alignSelf: 'flex-end',
+    padding: space.sm,
+  },
+  modalCloseText: {
+    fontSize: fontSize.md,
+    fontWeight: fontWeight.bold,
   },
 });

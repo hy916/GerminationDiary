@@ -1,203 +1,306 @@
-import React, { useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import { View, Text, StyleSheet, Pressable, ScrollView, Modal, Image } from 'react-native';
 import { getTodayDateString, getWeekDateRange, getMonthDateRange, countRecordsInRange } from '../utils/timeUtils';
+import Screen from '../ui/components/Screen';
+import Card from '../ui/components/Card';
+import Chip from '../ui/components/Chip';
+import { getTheme } from '../ui/theme';
+import { space, fontSize, fontWeight, radius } from '../ui/tokens';
 
 export default function HomeScreen({ baby, onNavigate }) {
-  const [viewMode, setViewMode] = useState('today'); // 'today', 'week', 'month'
+  const theme = getTheme(baby);
+  const [viewMode, setViewMode] = useState('today');
   const [selectedImage, setSelectedImage] = useState(null);
-  const themeColor = baby.gender === '女' ? '#F39AC3' : '#7BCEEA';
+  const [filter, setFilter] = useState('all');
 
-  // 今日数据
   const today = getTodayDateString();
-  const todayRecords = (records = []) => records.filter(r => r.createdAt.startsWith(today));
-  const todayFeeding = todayRecords(baby.feedingRecords).length;
-  const todaySleep = todayRecords(baby.sleepRecords).length;
-  const todayDiaper = todayRecords(baby.diaperRecords).length;
-  const todayGrowth = todayRecords(baby.growthRecords).length;
+  const todayRecords = (records = []) => records.filter((r) => (r.createdAt || '').startsWith(today));
 
-  // 本周数据
   const { startOfWeek, endOfWeek } = getWeekDateRange();
-  const weekFeeding = countRecordsInRange(baby.feedingRecords, startOfWeek, endOfWeek);
-  const weekSleep = countRecordsInRange(baby.sleepRecords, startOfWeek, endOfWeek);
-  const weekDiaper = countRecordsInRange(baby.diaperRecords, startOfWeek, endOfWeek);
-  const weekGrowth = countRecordsInRange(baby.growthRecords, startOfWeek, endOfWeek);
-
-  // 本月数据
   const { startOfMonth, endOfMonth } = getMonthDateRange();
-  const monthFeeding = countRecordsInRange(baby.feedingRecords, startOfMonth, endOfMonth);
-  const monthSleep = countRecordsInRange(baby.sleepRecords, startOfMonth, endOfMonth);
-  const monthDiaper = countRecordsInRange(baby.diaperRecords, startOfMonth, endOfMonth);
-  const monthGrowth = countRecordsInRange(baby.growthRecords, startOfMonth, endOfMonth);
 
-  const allRecords = [
-    ...baby.feedingRecords.map(r => ({ ...r, type: '喂奶' })),
-    ...baby.diaperRecords.map(r => ({ ...r, type: '排便' })),
-    ...baby.sleepRecords.map(r => ({ ...r, type: '睡眠' })),
-    ...baby.growthRecords.map(r => ({ ...r, type: '生长' })),
-    ...baby.vaccineRecords.map(r => ({ ...r, type: '疫苗' })),
-    ...baby.illnessRecords.map(r => ({ ...r, type: '生病' })),
-  ].sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt)).slice(0, 20);
+  const summary = useMemo(() => {
+    const feeding = viewMode === 'today'
+      ? todayRecords(baby.feedingRecords).length
+      : viewMode === 'week'
+        ? countRecordsInRange(baby.feedingRecords, startOfWeek, endOfWeek)
+        : countRecordsInRange(baby.feedingRecords, startOfMonth, endOfMonth);
 
-  const getSummaryData = () => {
-    switch (viewMode) {
-      case 'week':
-        return { feeding: weekFeeding, sleep: weekSleep, diaper: weekDiaper, growth: weekGrowth, title: '周记录速览' };
-      case 'month':
-        return { feeding: monthFeeding, sleep: monthSleep, diaper: monthDiaper, growth: monthGrowth, title: '月记录速览' };
-      default:
-        return { feeding: todayFeeding, sleep: todaySleep, diaper: todayDiaper, growth: todayGrowth, title: '今日记录速览' };
-    }
-  };
+    const sleep = viewMode === 'today'
+      ? todayRecords(baby.sleepRecords).length
+      : viewMode === 'week'
+        ? countRecordsInRange(baby.sleepRecords, startOfWeek, endOfWeek)
+        : countRecordsInRange(baby.sleepRecords, startOfMonth, endOfMonth);
 
-  const summary = getSummaryData();
+    const diaper = viewMode === 'today'
+      ? todayRecords(baby.diaperRecords).length
+      : viewMode === 'week'
+        ? countRecordsInRange(baby.diaperRecords, startOfWeek, endOfWeek)
+        : countRecordsInRange(baby.diaperRecords, startOfMonth, endOfMonth);
+
+    const growth = viewMode === 'today'
+      ? todayRecords(baby.growthRecords).length
+      : viewMode === 'week'
+        ? countRecordsInRange(baby.growthRecords, startOfWeek, endOfWeek)
+        : countRecordsInRange(baby.growthRecords, startOfMonth, endOfMonth);
+
+    const title = viewMode === 'week' ? '周记录速览' : viewMode === 'month' ? '月记录速览' : '今日记录速览';
+
+    return { feeding, sleep, diaper, growth, title };
+  }, [
+    baby.feedingRecords,
+    baby.sleepRecords,
+    baby.diaperRecords,
+    baby.growthRecords,
+    endOfMonth,
+    endOfWeek,
+    startOfMonth,
+    startOfWeek,
+    viewMode,
+  ]);
+
+  const allRecords = useMemo(() => {
+    const merged = [
+      ...withModule(baby.feedingRecords, 'feeding', '喂奶'),
+      ...withModule(baby.sleepRecords, 'sleep', '睡眠'),
+      ...withModule(baby.diaperRecords, 'diaper', '排便'),
+      ...withModule(baby.growthRecords, 'growth', '生长'),
+      ...withModule(baby.vaccineRecords, 'vaccine', '疫苗'),
+      ...withModule(baby.illnessRecords, 'illness', '生病'),
+    ]
+      .filter((r) => !!r.createdAt)
+      .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+
+    return merged.slice(0, 30);
+  }, [
+    baby.diaperRecords,
+    baby.feedingRecords,
+    baby.growthRecords,
+    baby.illnessRecords,
+    baby.sleepRecords,
+    baby.vaccineRecords,
+  ]);
+
+  const filteredRecords = useMemo(() => {
+    if (filter === 'all') return allRecords;
+    return allRecords.filter((r) => r.module === filter);
+  }, [allRecords, filter]);
 
   return (
-    <ScrollView style={styles.page} contentContainerStyle={styles.contentContainer}>
-      <View style={styles.summaryCard}>
-        <View style={styles.summaryHeader}>
-          <Text style={styles.summaryTitle}>{summary.title}</Text>
-          <View style={styles.modeButtonsContainer}>
+    <Screen baby={baby} padded={false}>
+      <ScrollView contentContainerStyle={styles.container}>
+        <View style={styles.topRow}>
+          <Text style={[styles.appTitle, { color: theme.colors.text }]}>萌芽日记</Text>
+          <Pressable onPress={() => onNavigate('Profile')} style={[styles.profilePill, { backgroundColor: theme.colors.surface }]}>
+            <Text style={[styles.profilePillText, { color: theme.colors.textMuted }]}>
+              {baby.name || '宝宝'} · 档案
+            </Text>
+          </Pressable>
+        </View>
+
+        <View style={styles.quickGrid}>
+          <View style={styles.quickRow}>
+            <QuickEntry baby={baby} label="喂奶" onPress={() => onNavigate('Feeding')} />
+            <QuickEntry baby={baby} label="睡眠" onPress={() => onNavigate('Sleep')} />
+          </View>
+          <View style={styles.quickRow}>
+            <QuickEntry baby={baby} label="排便" onPress={() => onNavigate('Diaper')} />
+            <QuickEntry baby={baby} label="生长" onPress={() => onNavigate('Growth')} />
+          </View>
+        </View>
+
+        <Card baby={baby} style={styles.cardSpacing}>
+          <Text style={[styles.cardTitle, { color: theme.colors.text }]}>{summary.title}</Text>
+          <View style={styles.chipRow}>
+            <Chip baby={baby} label="今日" selected={viewMode === 'today'} onPress={() => setViewMode('today')} style={styles.smallChip} />
+            <Chip baby={baby} label="周" selected={viewMode === 'week'} onPress={() => setViewMode('week')} style={styles.smallChip} />
+            <Chip baby={baby} label="月" selected={viewMode === 'month'} onPress={() => setViewMode('month')} style={styles.smallChip} />
+          </View>
+          <View style={styles.summaryRow}>
+            <SummaryItem baby={baby} label="喂奶" value={summary.feeding} />
+            <SummaryItem baby={baby} label="排便" value={summary.diaper} />
+            <SummaryItem baby={baby} label="睡眠" value={summary.sleep} />
+            <SummaryItem baby={baby} label="生长" value={summary.growth} />
+          </View>
+        </Card>
+
+        <Card baby={baby} style={styles.cardSpacing}>
+          <View style={styles.latestHeader}>
+            <Text style={[styles.cardTitle, { color: theme.colors.text }]}>最新记录</Text>
+            <Pressable onPress={() => onNavigate('Records')} hitSlop={10}>
+              <Text style={[styles.linkText, { color: theme.colors.textMuted }]}>查看全部</Text>
+            </Pressable>
+          </View>
+
+          <View style={styles.filterRow}>
             {[
-              { key: 'today', label: '今日' },
-              { key: 'week', label: '周' },
-              { key: 'month', label: '月' },
+              { key: 'all', label: '全部' },
+              { key: 'feeding', label: '喂奶' },
+              { key: 'sleep', label: '睡眠' },
+              { key: 'diaper', label: '排便' },
+              { key: 'growth', label: '生长' },
             ].map((item) => (
-              <Pressable
+              <Chip
                 key={item.key}
-                onPress={() => setViewMode(item.key)}
-                style={[styles.modeButton, viewMode === item.key && { ...styles.modeButtonActive, backgroundColor: themeColor }]}
-              >
-                <Text style={[styles.modeButtonText, viewMode === item.key && styles.modeButtonTextActive]}>
-                  {item.label}
-                </Text>
-              </Pressable>
+                baby={baby}
+                label={item.label}
+                selected={filter === item.key}
+                onPress={() => setFilter(item.key)}
+                style={styles.filterChip}
+              />
             ))}
           </View>
-        </View>
-        <View style={styles.summaryRow}>
-          <View style={styles.summaryItem}>
-            <Text style={styles.summaryNumber}>{summary.feeding}</Text>
-            <Text style={styles.summaryLabel}>喂奶</Text>
-          </View>
-          <View style={styles.summaryItem}>
-            <Text style={styles.summaryNumber}>{summary.diaper}</Text>
-            <Text style={styles.summaryLabel}>排便</Text>
-          </View>
-          <View style={styles.summaryItem}>
-            <Text style={styles.summaryNumber}>{summary.sleep}</Text>
-            <Text style={styles.summaryLabel}>睡眠</Text>
-          </View>
-          <View style={styles.summaryItem}>
-            <Text style={styles.summaryNumber}>{summary.growth}</Text>
-            <Text style={styles.summaryLabel}>生长</Text>
-          </View>
-        </View>
-      </View>
-      <View style={styles.detailCard}>
-        <Text style={styles.detailTitle}>最新记录</Text>
-        {allRecords.length > 0 ? (
-          allRecords.map((record, index) => (
-            <View key={index} style={styles.recordRow}>
-              <View style={styles.recordLeft}>
-                <Text style={styles.recordType}>{record.type}：</Text>
-                <Text style={styles.recordTime}>{new Date(record.createdAt).toLocaleString()}</Text>
-                <Text style={styles.recordNote}>{record.note || '无备注'}</Text>
+
+          {filteredRecords.length === 0 ? (
+            <Text style={[styles.emptyText, { color: theme.colors.textSubtle }]}>暂无记录</Text>
+          ) : (
+            filteredRecords.map((record) => (
+              <View key={record.id} style={[styles.recordItem, { backgroundColor: theme.colors.surfaceMuted }]}>
+                <View style={styles.recordMain}>
+                  <Text style={[styles.recordTitle, { color: theme.colors.text }]}>{record.moduleLabel}</Text>
+                  <Text style={[styles.recordTime, { color: theme.colors.textSubtle }]}>{record.createdAt}</Text>
+                  <Text style={[styles.recordSummary, { color: theme.colors.textMuted }]} numberOfLines={2}>
+                    {formatRecordSummary(record)}
+                  </Text>
+                  {record.note ? (
+                    <Text style={[styles.recordNote, { color: theme.colors.textMuted }]} numberOfLines={2}>
+                      备注：{record.note}
+                    </Text>
+                  ) : null}
+                </View>
+                {record.images?.[0] ? (
+                  <Pressable onPress={() => setSelectedImage(record.images[0])} style={styles.recordThumbWrap}>
+                    <Image source={{ uri: record.images[0] }} style={styles.recordThumb} />
+                  </Pressable>
+                ) : null}
               </View>
-              {record.images && record.images.length > 0 && (
-                <Pressable style={styles.thumbnailContainer} onPress={() => setSelectedImage(record.images[0])}>
-                  <Image source={{ uri: record.images[0] }} style={styles.thumbnail} />
-                  {record.images.length > 1 && (
-                    <View style={styles.imageCountBadge}>
-                      <Text style={styles.imageCountText}>+{record.images.length - 1}</Text>
-                    </View>
-                  )}
-                </Pressable>
-              )}
-            </View>
-          ))
-        ) : (
-          <Text style={styles.emptyText}>暂无记录，点击上方快捷按钮开始记录。</Text>
-        )}
-      </View>
-      <Modal visible={!!selectedImage} transparent={true} onRequestClose={() => setSelectedImage(null)}>
-        <View style={styles.modalOverlay}>
-          <Pressable style={styles.modalClose} onPress={() => setSelectedImage(null)}>
-            <Text style={styles.modalCloseText}>关闭</Text>
-          </Pressable>
-          <Image source={{ uri: selectedImage }} style={styles.modalImage} />
-        </View>
-      </Modal>
-    </ScrollView>
+            ))
+          )}
+        </Card>
+
+        <Modal visible={!!selectedImage} transparent animationType="fade" onRequestClose={() => setSelectedImage(null)}>
+          <View style={styles.modalOverlay}>
+            <Pressable style={styles.modalClose} onPress={() => setSelectedImage(null)}>
+              <Text style={[styles.modalCloseText, { color: theme.colors.text }]}>关闭</Text>
+            </Pressable>
+            {selectedImage ? <Image source={{ uri: selectedImage }} style={styles.modalImage} /> : null}
+          </View>
+        </Modal>
+      </ScrollView>
+    </Screen>
+  );
+}
+
+function withModule(records, module, moduleLabel) {
+  return (records || []).map((r) => ({
+    ...r,
+    module,
+    moduleLabel,
+  }));
+}
+
+function formatRecordSummary(record) {
+  if (record.module === 'feeding') {
+    const amount = record.amount ? `奶量：${record.amount}` : '';
+    const duration = record.duration ? `时长：${record.duration}` : '';
+    const type = record.type ? `${record.type}` : '';
+    return [type, duration, amount].filter(Boolean).join('  ');
+  }
+  if (record.module === 'sleep') {
+    const range = record.startTime && record.endTime ? `${record.startTime} - ${record.endTime}` : '';
+    const duration = record.duration ? `· ${record.duration}` : '';
+    return `${record.type || '睡眠'} · ${range} ${duration}`.trim();
+  }
+  if (record.module === 'diaper') {
+    return `${record.type || '排便'}${record.note ? ` · ${record.note}` : ''}`.trim();
+  }
+  if (record.module === 'growth') {
+    const w = record.weight ? `体重：${record.weight}` : '';
+    const h = record.height ? `身高：${record.height}` : '';
+    return [w, h].filter(Boolean).join('  ') || (record.note || '');
+  }
+  return record.note || '';
+}
+
+function SummaryItem({ baby, label, value }) {
+  const theme = getTheme(baby);
+  return (
+    <View style={styles.summaryItem}>
+      <Text style={[styles.summaryNumber, { color: theme.colors.accent }]}>{value}</Text>
+      <Text style={[styles.summaryLabel, { color: theme.colors.textSubtle }]}>{label}</Text>
+    </View>
+  );
+}
+
+function QuickEntry({ baby, label, onPress }) {
+  const theme = getTheme(baby);
+  return (
+    <Pressable onPress={onPress} style={[styles.quickButton, { backgroundColor: theme.colors.surface }]}>
+      <Text style={[styles.quickText, { color: theme.colors.text }]}>{label}</Text>
+    </Pressable>
   );
 }
 
 const styles = StyleSheet.create({
-  page: {
-    marginTop:40,
-    flex: 1,
-    backgroundColor: '#F8F4EE',
+  container: {
+    paddingTop: space.xl,
+    paddingHorizontal: space.lg,
+    paddingBottom: space.xxl,
   },
-  contentContainer: {
-    padding: 16,
-  },
-  quickContainer: {
+  topRow: {
     flexDirection: 'row',
+    alignItems: 'center',
     justifyContent: 'space-between',
-    marginBottom: 16,
+    marginBottom: space.xl,
+  },
+  appTitle: {
+    fontSize: fontSize.xxl,
+    fontWeight: fontWeight.bold,
+  },
+  profilePill: {
+    borderRadius: radius.pill,
+    paddingHorizontal: space.lg,
+    paddingVertical: space.sm,
+  },
+  profilePillText: {
+    fontSize: fontSize.md,
+    fontWeight: fontWeight.bold,
+  },
+  quickGrid: {
+    marginBottom: space.lg,
+  },
+  quickRow: {
+    flexDirection: 'row',
+    gap: space.lg,
   },
   quickButton: {
     flex: 1,
-    marginHorizontal: 4,
-    backgroundColor: '#7D5A50',
-    borderRadius: 12,
-    paddingVertical: 16,
+    borderRadius: radius.xl,
+    paddingVertical: 22,
     alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: space.lg,
   },
   quickText: {
-    color: '#fff',
-    fontSize: 16,
-    fontWeight: '600',
+    fontSize: fontSize.xl,
+    fontWeight: fontWeight.bold,
   },
-  summaryCard: {
-    backgroundColor: '#FFF',
-    borderRadius: 14,
-    padding: 16,
-    marginBottom: 16,
-    shadowColor: '#000',
-    shadowOpacity: 0.03,
-    shadowRadius: 8,
-    elevation: 2,
+  cardSpacing: {
+    marginBottom: space.lg,
   },
-  summaryHeader: {
-    marginBottom: 12,
+  cardTitle: {
+    fontSize: fontSize.xl,
+    fontWeight: fontWeight.bold,
+    marginBottom: space.md,
   },
-  summaryTitle: {
-    fontSize: 16,
-    fontWeight: '700',
-    color: '#4A403A',
-    marginBottom: 12,
-  },
-  modeButtonsContainer: {
+  chipRow: {
     flexDirection: 'row',
-    justifyContent: 'flex-start',
-    gap: 8,
+    gap: space.sm,
+    marginBottom: space.lg,
   },
-  modeButton: {
+  smallChip: {
     paddingVertical: 6,
-    paddingHorizontal: 12,
-    borderRadius: 8,
-    backgroundColor: '#F0ECE7',
-  },
-  modeButtonActive: {
-    backgroundColor: '#7D5A50',
-  },
-  modeButtonText: {
-    fontSize: 12,
-    fontWeight: '600',
-    color: '#4A403A',
-  },
-  modeButtonTextActive: {
-    color: '#fff',
+    paddingHorizontal: 18,
   },
   summaryRow: {
     flexDirection: 'row',
@@ -208,121 +311,83 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   summaryNumber: {
-    fontSize: 22,
-    fontWeight: '700',
-    color: '#7D5A50',
+    fontSize: 30,
+    fontWeight: fontWeight.bold,
   },
   summaryLabel: {
     marginTop: 6,
-    fontSize: 12,
-    color: '#8B7C70',
+    fontSize: fontSize.sm,
+    fontWeight: fontWeight.medium,
   },
-  detailCard: {
-    backgroundColor: '#FFF',
-    borderRadius: 14,
-    padding: 16,
-    shadowColor: '#000',
-    shadowOpacity: 0.03,
-    shadowRadius: 8,
-    elevation: 2,
+  latestHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    marginBottom: space.md,
   },
-  detailTitle: {
-    fontSize: 16,
-    fontWeight: '700',
-    color: '#4A403A',
-    marginBottom: 10,
+  linkText: {
+    fontSize: fontSize.md,
+    fontWeight: fontWeight.bold,
   },
-  detailRow: {
+  filterRow: {
     flexDirection: 'row',
     flexWrap: 'wrap',
+    gap: space.sm,
+    marginBottom: space.lg,
   },
-  detailLabel: {
-    fontSize: 14,
-    fontWeight: '600',
-    color: '#5D4C44',
-  },
-  detailValue: {
-    fontSize: 14,
-    color: '#7A6B62',
+  filterChip: {
+    paddingVertical: 6,
+    paddingHorizontal: 16,
   },
   emptyText: {
-    fontSize: 14,
-    color: '#9D8F86',
+    fontSize: fontSize.md,
+    fontWeight: fontWeight.medium,
   },
-  floatingButtonContainer: {
+  recordItem: {
+    borderRadius: radius.lg,
+    padding: space.lg,
     flexDirection: 'row',
-    justifyContent: 'space-between',
-    marginTop: 24,
-    marginBottom: 16,
-    gap: 10,
+    marginBottom: space.md,
   },
-  floatingButton: {
+  recordMain: {
     flex: 1,
-    backgroundColor: '#7D5A50',
-    paddingVertical: 14,
-    borderRadius: 12,
-    alignItems: 'center',
+    marginRight: space.md,
   },
-  floatingButtonText: {
-    color: '#fff',
-    fontSize: 15,
-    fontWeight: '700',
-  },
-  recordRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginBottom: 12,
-    paddingVertical: 8,
-    paddingHorizontal: 12,
-    backgroundColor: '#F9F6F2',
-    borderRadius: 8,
-  },
-  recordLeft: {
-    flex: 1,
-  },
-  recordType: {
-    fontSize: 14,
-    fontWeight: '600',
-    color: '#4A403A',
+  recordTitle: {
+    fontSize: fontSize.lg,
+    fontWeight: fontWeight.bold,
+    marginBottom: 2,
   },
   recordTime: {
-    fontSize: 12,
-    color: '#8B7C70',
-    marginTop: 2,
+    fontSize: fontSize.sm,
+    fontWeight: fontWeight.medium,
+    marginBottom: 6,
+  },
+  recordSummary: {
+    fontSize: fontSize.md,
+    fontWeight: fontWeight.medium,
+    marginBottom: 4,
   },
   recordNote: {
-    fontSize: 14,
-    color: '#7A6B62',
-    marginTop: 4,
+    fontSize: fontSize.md,
+    fontWeight: fontWeight.medium,
   },
-  thumbnailContainer: {
-    marginLeft: 12,
-    position: 'relative',
+  recordThumbWrap: {
+    width: 86,
+    height: 86,
+    borderRadius: radius.lg,
+    overflow: 'hidden',
   },
-  thumbnail: {
-    width: 50,
-    height: 50,
-    borderRadius: 6,
-  },
-  imageCountBadge: {
-    position: 'absolute',
-    top: -5,
-    right: -5,
-    backgroundColor: '#FF6B6B',
-    borderRadius: 10,
-    paddingHorizontal: 4,
-    paddingVertical: 2,
-  },
-  imageCountText: {
-    color: '#fff',
-    fontSize: 10,
-    fontWeight: '600',
+  recordThumb: {
+    width: '100%',
+    height: '100%',
   },
   modalOverlay: {
     flex: 1,
-    backgroundColor: 'rgba(0,0,0,0.8)',
+    backgroundColor: 'rgba(0,0,0,0.75)',
     justifyContent: 'center',
     alignItems: 'center',
+    padding: space.lg,
   },
   modalClose: {
     position: 'absolute',
@@ -331,16 +396,16 @@ const styles = StyleSheet.create({
     backgroundColor: '#fff',
     paddingHorizontal: 12,
     paddingVertical: 6,
-    borderRadius: 6,
+    borderRadius: 8,
   },
   modalCloseText: {
-    color: '#4A403A',
-    fontSize: 14,
-    fontWeight: '600',
+    fontSize: fontSize.md,
+    fontWeight: fontWeight.bold,
   },
   modalImage: {
-    width: '90%',
+    width: '100%',
     height: '70%',
     resizeMode: 'contain',
+    borderRadius: radius.lg,
   },
 });

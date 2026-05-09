@@ -1,33 +1,85 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, StyleSheet, Pressable, TextInput, ScrollView, Alert } from 'react-native';
+import { Alert, Image, Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
+import * as ImagePicker from 'expo-image-picker';
 import { formatDateTimeYYYYMMDDHHmm } from '../utils/timeUtils';
+import Screen from '../ui/components/Screen';
+import Card from '../ui/components/Card';
+import Button from '../ui/components/Button';
+import Chip from '../ui/components/Chip';
+import { getTheme } from '../ui/theme';
+import { fontSize, fontWeight, radius, space } from '../ui/tokens';
 
-export default function BabyProfileScreen({ baby, babies, onSwitchBaby, onAddBaby, onUpdateBaby }) {
+export default function BabyProfileScreen({ baby, babies, onSwitchBaby, onAddBaby, onUpdateBaby, onBack }) {
+  const theme = getTheme(baby);
   const [name, setName] = useState(baby.name || '');
-  const [gender, setGender] = useState(baby.gender || '男');
+  const [gender, setGender] = useState(baby.gender || '女');
   const [birthday, setBirthday] = useState(baby.birthday || '');
   const [weight, setWeight] = useState(baby.birthInfo.weight || '');
   const [length, setLength] = useState(baby.birthInfo.length || '');
   const [delivery, setDelivery] = useState(baby.birthInfo.delivery || '顺产');
   const [newBabyMode, setNewBabyMode] = useState(false);
-  const themeColor = baby.gender === '女' ? '#F39AC3' : '#7BCEEA';
-
-  const handleBirthdayFocus = () => {
-    setBirthday(formatDateTimeYYYYMMDDHHmm());
-  };
-
-  const handleNewBabyBirthdayFocus = () => {
-    setBirthday(formatDateTimeYYYYMMDDHHmm());
-  };
+  const [avatar, setAvatar] = useState(baby.avatar || '');
 
   useEffect(() => {
     setName(baby.name || '');
-    setGender(baby.gender || '男');
+    setGender(baby.gender || '女');
     setBirthday(baby.birthday || '');
     setWeight(baby.birthInfo.weight || '');
     setLength(baby.birthInfo.length || '');
     setDelivery(baby.birthInfo.delivery || '顺产');
+    setAvatar(baby.avatar || '');
   }, [baby]);
+
+  const pickImage = async () => {
+    const permissionResult = await ImagePicker.requestMediaLibraryPermissionsAsync();
+    if (permissionResult.granted === false) {
+      Alert.alert('权限被拒绝', '需要相册权限才能选择图片');
+      return;
+    }
+
+    const result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ImagePicker.MediaTypeOptions.Images,
+      allowsEditing: true,
+      aspect: [1, 1],
+      quality: 1,
+    });
+
+    if (!result.canceled) {
+      const uri = result.assets[0].uri;
+      setAvatar(uri);
+    }
+  };
+
+  const takePhoto = async () => {
+    const permissionResult = await ImagePicker.requestCameraPermissionsAsync();
+    if (permissionResult.granted === false) {
+      Alert.alert('权限被拒绝', '需要相机权限才能拍照');
+      return;
+    }
+
+    const result = await ImagePicker.launchCameraAsync({
+      allowsEditing: true,
+      aspect: [1, 1],
+      quality: 1,
+    });
+
+    if (!result.canceled) {
+      const uri = result.assets[0].uri;
+      setAvatar(uri);
+    }
+  };
+
+  const selectAvatar = () => {
+    Alert.alert('选择头像', '请选择头像来源', [
+      { text: '相册', onPress: pickImage },
+      { text: '拍照', onPress: takePhoto },
+      { text: '取消', style: 'cancel' },
+    ]);
+  };
+
+  const fillBirthdayNow = () => {
+    setBirthday(formatDateTimeYYYYMMDDHHmm());
+  };
 
   const saveProfile = () => {
     const payload = {
@@ -35,6 +87,7 @@ export default function BabyProfileScreen({ baby, babies, onSwitchBaby, onAddBab
       name,
       gender,
       birthday,
+      avatar,
       birthInfo: {
         weight,
         length,
@@ -48,205 +101,283 @@ export default function BabyProfileScreen({ baby, babies, onSwitchBaby, onAddBab
 
   const saveNewBaby = () => {
     if (!name || !birthday) return;
-    onAddBaby({ name, gender, birthday, birthInfo: { weight, length, delivery } });
+    onAddBaby({ name, gender, birthday, avatar, birthInfo: { weight, length, delivery } });
     Alert.alert('成功', '新宝宝添加成功', [{ text: '确定' }]);
     setName('');
     setBirthday('');
     setWeight('');
     setLength('');
     setDelivery('顺产');
+    setAvatar('');
+    setGender('女');
     setNewBabyMode(false);
   };
 
   return (
-    <ScrollView style={styles.page} contentContainerStyle={styles.contentContainer}>
-      <View style={styles.section}>
-        <Text style={styles.sectionTitle}>宝宝切换</Text>
-        <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.babyList}>
-          {babies.map((item) => (
-            <Pressable
-              key={item.id}
-              onPress={() => onSwitchBaby(item.id)}
-              style={[styles.babyCard, item.id === baby.id && { backgroundColor: themeColor }]}
-            >
-              <Text style={[styles.babyName, item.id === baby.id && styles.babyNameActive]}>{item.name}</Text>
-              <Text style={styles.babySubtitle}>{item.gender} · {item.birthday}</Text>
-            </Pressable>
-          ))}
-        </ScrollView>
-      </View>
+    <Screen baby={baby} title="宝宝档案" onBack={onBack}>
+      <ScrollView contentContainerStyle={styles.contentContainer}>
+        <Card baby={baby} style={styles.cardSpacing}>
+          <Text style={[styles.sectionTitle, { color: theme.colors.text }]}>宝宝切换</Text>
+          <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.babyList}>
+            {babies.map((item) => {
+              const active = item.id === baby.id;
+              return (
+                <Pressable
+                  key={item.id}
+                  onPress={() => onSwitchBaby(item.id)}
+                  style={[
+                    styles.babyCard,
+                    { backgroundColor: active ? theme.colors.accent : theme.colors.surfaceSoft },
+                  ]}
+                >
+                  <Text style={[styles.babyName, { color: active ? '#fff' : theme.colors.text }]}>{item.name || '宝宝'}</Text>
+                  <Text style={[styles.babySubtitle, { color: active ? '#fff' : theme.colors.textMuted }]}>
+                    {item.gender} · {item.birthday || '--'}
+                  </Text>
+                </Pressable>
+              );
+            })}
+          </ScrollView>
+        </Card>
 
-      <View style={styles.section}>
-        <Text style={styles.sectionTitle}>编辑当前档案</Text>
-        <View style={styles.fieldRow}>
-          <Text style={styles.fieldLabel}>姓名</Text>
-          <TextInput style={styles.fieldInput} value={name} onChangeText={setName} placeholder="宝宝昵称" />
-        </View>
-        <View style={styles.fieldRow}>
-          <Text style={styles.fieldLabel}>性别</Text>
-          <TextInput style={styles.fieldInput} value={gender} onChangeText={setGender} placeholder="男/女" />
-        </View>
-        <View style={styles.fieldRow}>
-          <Text style={styles.fieldLabel}>出生日期</Text>
-          <TextInput
-            style={styles.fieldInput}
-            value={birthday}
-            onChangeText={setBirthday}
-            onFocus={handleBirthdayFocus}
-            placeholder="点击自动填充当前日期"
-            editable={true}
-          />
-        </View>
-        <View style={styles.fieldRow}>
-          <Text style={styles.fieldLabel}>出生体重</Text>
-          <TextInput style={styles.fieldInput} value={weight} onChangeText={setWeight} placeholder="如 3200g" />
-        </View>
-        <View style={styles.fieldRow}>
-          <Text style={styles.fieldLabel}>出生身长</Text>
-          <TextInput style={styles.fieldInput} value={length} onChangeText={setLength} placeholder="如 50cm" />
-        </View>
-        <View style={styles.fieldRow}>
-          <Text style={styles.fieldLabel}>出生方式</Text>
-          <TextInput style={styles.fieldInput} value={delivery} onChangeText={setDelivery} placeholder="顺产 / 剖腹产" />
-        </View>
-        <Pressable style={[styles.saveButton, { backgroundColor: themeColor }]} onPress={saveProfile}>
-          <Text style={styles.saveText}>保存档案</Text>
-        </Pressable>
-      </View>
-
-      <View style={styles.section}>
-        <Text style={styles.sectionTitle}>添加新宝宝</Text>
-        <Pressable style={styles.secondaryButton} onPress={() => setNewBabyMode(!newBabyMode)}>
-          <Text style={styles.secondaryButtonText}>{newBabyMode ? '取消添加' : '添加宝宝档案'}</Text>
-        </Pressable>
-        {newBabyMode && (
-          <View style={styles.newBabyForm}>
-            <View style={styles.fieldRow}>
-              <Text style={styles.fieldLabel}>姓名</Text>
-              <TextInput style={styles.fieldInput} value={name} onChangeText={setName} placeholder="宝宝昵称" />
-            </View>
-        <View style={styles.fieldRow}>
-          <Text style={styles.fieldLabel}>性别</Text>
-          <TextInput style={styles.fieldInput} value={gender} onChangeText={setGender} placeholder="男/女" />
-        </View>
-            <View style={styles.fieldRow}>
-              <Text style={styles.fieldLabel}>出生日期</Text>
-              <TextInput
-                style={styles.fieldInput}
-                value={birthday}
-                onChangeText={setBirthday}
-                onFocus={handleNewBabyBirthdayFocus}
-                placeholder="点击自动填充当前日期"
-                editable={true}
-              />
-            </View>
-                    <View style={styles.fieldRow}>
-          <Text style={styles.fieldLabel}>出生体重</Text>
-          <TextInput style={styles.fieldInput} value={weight} onChangeText={setWeight} placeholder="如 3200g" />
-        </View>
-        <View style={styles.fieldRow}>
-          <Text style={styles.fieldLabel}>出生身长</Text>
-          <TextInput style={styles.fieldInput} value={length} onChangeText={setLength} placeholder="如 50cm" />
-        </View>
-        <View style={styles.fieldRow}>
-          <Text style={styles.fieldLabel}>出生方式</Text>
-          <TextInput style={styles.fieldInput} value={delivery} onChangeText={setDelivery} placeholder="顺产 / 剖腹产" />
-        </View>
-            <Pressable style={[styles.saveButton, { backgroundColor: themeColor }]} onPress={saveNewBaby}>
-              <Text style={styles.saveText}>保存新宝宝</Text>
+        <Card baby={baby} style={styles.cardSpacing}>
+          <Text style={[styles.sectionTitle, { color: theme.colors.text }]}>编辑当前档案</Text>
+          <View style={styles.avatarRow}>
+            <Pressable onPress={selectAvatar}>
+              {avatar ? (
+                <Image source={{ uri: avatar }} style={styles.avatar} />
+              ) : (
+                <View style={[styles.avatar, { backgroundColor: theme.colors.surfaceSoft }]}>
+                  <Text style={[styles.defaultAvatarText, { color: theme.colors.textMuted }]}>选择头像</Text>
+                </View>
+              )}
             </Pressable>
           </View>
-        )}
-      </View>
-    </ScrollView>
+
+          <View style={styles.fieldBlock}>
+            <Text style={[styles.fieldLabel, { color: theme.colors.textMuted }]}>姓名</Text>
+            <TextInput
+              style={[styles.fieldInput, { backgroundColor: theme.colors.surfaceSoft, color: theme.colors.text }]}
+              value={name}
+              onChangeText={setName}
+              placeholder="宝宝昵称"
+              placeholderTextColor={theme.colors.placeholder}
+            />
+          </View>
+
+          <View style={styles.fieldBlock}>
+            <Text style={[styles.fieldLabel, { color: theme.colors.textMuted }]}>性别</Text>
+            <View style={styles.segmentRow}>
+              {['女', '男'].map((g) => (
+                <Chip key={g} baby={baby} label={g} selected={gender === g} onPress={() => setGender(g)} style={styles.segment} />
+              ))}
+            </View>
+          </View>
+
+          <View style={styles.fieldBlock}>
+            <Text style={[styles.fieldLabel, { color: theme.colors.textMuted }]}>出生日期</Text>
+            <TextInput
+              style={[styles.fieldInput, { backgroundColor: theme.colors.surfaceSoft, color: theme.colors.text }]}
+              value={birthday}
+              onChangeText={setBirthday}
+              onFocus={fillBirthdayNow}
+              placeholder="点击自动填充当前日期"
+              placeholderTextColor={theme.colors.placeholder}
+              editable={true}
+            />
+          </View>
+
+          <View style={styles.fieldBlock}>
+            <Text style={[styles.fieldLabel, { color: theme.colors.textMuted }]}>出生体重</Text>
+            <TextInput
+              style={[styles.fieldInput, { backgroundColor: theme.colors.surfaceSoft, color: theme.colors.text }]}
+              value={weight}
+              onChangeText={setWeight}
+              placeholder="如 3200g"
+              placeholderTextColor={theme.colors.placeholder}
+            />
+          </View>
+
+          <View style={styles.fieldBlock}>
+            <Text style={[styles.fieldLabel, { color: theme.colors.textMuted }]}>出生身长</Text>
+            <TextInput
+              style={[styles.fieldInput, { backgroundColor: theme.colors.surfaceSoft, color: theme.colors.text }]}
+              value={length}
+              onChangeText={setLength}
+              placeholder="如 50cm"
+              placeholderTextColor={theme.colors.placeholder}
+            />
+          </View>
+
+          <View style={styles.fieldBlock}>
+            <Text style={[styles.fieldLabel, { color: theme.colors.textMuted }]}>出生方式</Text>
+            <TextInput
+              style={[styles.fieldInput, { backgroundColor: theme.colors.surfaceSoft, color: theme.colors.text }]}
+              value={delivery}
+              onChangeText={setDelivery}
+              placeholder="顺产 / 剖腹产"
+              placeholderTextColor={theme.colors.placeholder}
+            />
+          </View>
+
+          <Button baby={baby} label="保存档案" onPress={saveProfile} />
+        </Card>
+
+        <Card baby={baby}>
+          <Text style={[styles.sectionTitle, { color: theme.colors.text }]}>添加新宝宝</Text>
+          <Button
+            baby={baby}
+            label={newBabyMode ? '取消添加' : '添加宝宝档案'}
+            variant="secondary"
+            onPress={() => setNewBabyMode(!newBabyMode)}
+            style={styles.cardSpacingInner}
+          />
+          {newBabyMode ? (
+            <View>
+              <View style={styles.fieldBlock}>
+                <Text style={[styles.fieldLabel, { color: theme.colors.textMuted }]}>姓名</Text>
+                <TextInput
+                  style={[styles.fieldInput, { backgroundColor: theme.colors.surfaceSoft, color: theme.colors.text }]}
+                  value={name}
+                  onChangeText={setName}
+                  placeholder="宝宝昵称"
+                  placeholderTextColor={theme.colors.placeholder}
+                />
+              </View>
+
+              <View style={styles.fieldBlock}>
+                <Text style={[styles.fieldLabel, { color: theme.colors.textMuted }]}>性别</Text>
+                <View style={styles.segmentRow}>
+                  {['女', '男'].map((g) => (
+                    <Chip key={`new-${g}`} baby={baby} label={g} selected={gender === g} onPress={() => setGender(g)} style={styles.segment} />
+                  ))}
+                </View>
+              </View>
+
+              <View style={styles.fieldBlock}>
+                <Text style={[styles.fieldLabel, { color: theme.colors.textMuted }]}>出生日期</Text>
+                <TextInput
+                  style={[styles.fieldInput, { backgroundColor: theme.colors.surfaceSoft, color: theme.colors.text }]}
+                  value={birthday}
+                  onChangeText={setBirthday}
+                  onFocus={fillBirthdayNow}
+                  placeholder="点击自动填充当前日期"
+                  placeholderTextColor={theme.colors.placeholder}
+                  editable={true}
+                />
+              </View>
+
+              <View style={styles.fieldBlock}>
+                <Text style={[styles.fieldLabel, { color: theme.colors.textMuted }]}>出生体重</Text>
+                <TextInput
+                  style={[styles.fieldInput, { backgroundColor: theme.colors.surfaceSoft, color: theme.colors.text }]}
+                  value={weight}
+                  onChangeText={setWeight}
+                  placeholder="如 3200g"
+                  placeholderTextColor={theme.colors.placeholder}
+                />
+              </View>
+
+              <View style={styles.fieldBlock}>
+                <Text style={[styles.fieldLabel, { color: theme.colors.textMuted }]}>出生身长</Text>
+                <TextInput
+                  style={[styles.fieldInput, { backgroundColor: theme.colors.surfaceSoft, color: theme.colors.text }]}
+                  value={length}
+                  onChangeText={setLength}
+                  placeholder="如 50cm"
+                  placeholderTextColor={theme.colors.placeholder}
+                />
+              </View>
+
+              <View style={styles.fieldBlock}>
+                <Text style={[styles.fieldLabel, { color: theme.colors.textMuted }]}>出生方式</Text>
+                <TextInput
+                  style={[styles.fieldInput, { backgroundColor: theme.colors.surfaceSoft, color: theme.colors.text }]}
+                  value={delivery}
+                  onChangeText={setDelivery}
+                  placeholder="顺产 / 剖腹产"
+                  placeholderTextColor={theme.colors.placeholder}
+                />
+              </View>
+
+              <Button baby={baby} label="保存新宝宝" onPress={saveNewBaby} />
+            </View>
+          ) : null}
+        </Card>
+      </ScrollView>
+    </Screen>
   );
 }
 
 const styles = StyleSheet.create({
-  page: {
-    marginTop:40,
-    flex: 1,
-    backgroundColor: '#F8F4EE',
-  },
   contentContainer: {
-    padding: 16,
+    paddingBottom: space.xxl,
   },
-  section: {
-    marginBottom: 18,
-    backgroundColor: '#FFF',
-    borderRadius: 14,
-    padding: 16,
-    shadowColor: '#000',
-    shadowOpacity: 0.04,
-    shadowRadius: 10,
-    elevation: 2,
+  cardSpacing: {
+    marginBottom: space.lg,
+  },
+  cardSpacingInner: {
+    marginBottom: space.lg,
   },
   sectionTitle: {
-    fontSize: 16,
-    fontWeight: '700',
-    color: '#4A403A',
-    marginBottom: 12,
+    fontSize: fontSize.xl,
+    fontWeight: fontWeight.bold,
+    marginBottom: space.md,
   },
   babyList: {
-    marginTop: 8,
+    paddingRight: space.lg,
   },
   babyCard: {
-    padding: 12,
-    backgroundColor: '#F7F2EE',
-    borderRadius: 12,
-    marginRight: 10,
-    minWidth: 120,
+    borderRadius: radius.xl,
+    paddingVertical: space.md,
+    paddingHorizontal: space.lg,
+    marginRight: space.md,
+    minWidth: 140,
   },
   babyName: {
-    fontSize: 14,
-    fontWeight: '700',
-    color: '#4A403A',
-  },
-  babyNameActive: {
-    color: '#fff',
+    fontSize: fontSize.lg,
+    fontWeight: fontWeight.bold,
+    marginBottom: 4,
   },
   babySubtitle: {
-    marginTop: 6,
-    fontSize: 12,
-    color: '#7A6B62',
+    fontSize: fontSize.sm,
+    fontWeight: fontWeight.medium,
   },
-  fieldRow: {
-    marginBottom: 12,
+  avatarRow: {
+    alignItems: 'center',
+    marginBottom: space.lg,
+  },
+  avatar: {
+    width: 96,
+    height: 96,
+    borderRadius: 48,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  defaultAvatarText: {
+    fontSize: fontSize.md,
+    fontWeight: fontWeight.bold,
+  },
+  fieldBlock: {
+    marginBottom: space.lg,
   },
   fieldLabel: {
-    marginBottom: 6,
-    color: '#6E5D52',
-    fontSize: 13,
+    fontSize: fontSize.md,
+    fontWeight: fontWeight.medium,
+    marginBottom: space.sm,
   },
   fieldInput: {
-    backgroundColor: '#F3ECE4',
-    borderRadius: 10,
-    padding: 12,
-    color: '#4A403A',
-  },
-  saveButton: {
+    borderRadius: radius.lg,
+    paddingHorizontal: space.lg,
     paddingVertical: 14,
-    borderRadius: 14,
-    alignItems: 'center',
-    marginTop: 6,
+    fontSize: fontSize.md,
   },
-  saveText: {
-    color: '#fff',
-    fontSize: 15,
-    fontWeight: '700',
+  segmentRow: {
+    flexDirection: 'row',
+    gap: space.md,
   },
-  secondaryButton: {
-    backgroundColor: '#F0ECE7',
-    borderRadius: 14,
+  segment: {
+    flex: 1,
     paddingVertical: 12,
-    alignItems: 'center',
-  },
-  secondaryButtonText: {
-    color: '#4A403A',
-    fontSize: 14,
-    fontWeight: '600',
-  },
-  newBabyForm: {
-    marginTop: 14,
   },
 });

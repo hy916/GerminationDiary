@@ -1,19 +1,26 @@
-import React, { useState, useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { View, Text, StyleSheet, Pressable, TextInput, ScrollView, Alert, Modal, Image } from 'react-native';
 import * as ImagePicker from 'expo-image-picker';
-import {  formatDateTimeYYYYMMDDHHmm } from '../utils/timeUtils';
+import { formatDateTimeYYYYMMDDHHmm } from '../utils/timeUtils';
+import Screen from '../ui/components/Screen';
+import Card from '../ui/components/Card';
+import Chip from '../ui/components/Chip';
+import Button from '../ui/components/Button';
+import RoundActionButton from '../ui/components/RoundActionButton';
+import ImageStrip from '../ui/components/ImageStrip';
+import { getTheme } from '../ui/theme';
+import { space, fontSize, fontWeight, radius } from '../ui/tokens';
 
-export default function FeedingScreen({ baby, onAddFeeding, onUpdateFeeding, onDeleteFeeding, onSetPendingFeedingStart }) {
+export default function FeedingScreen({ baby, onBack, onAddFeeding, onUpdateFeeding, onDeleteFeeding, onSetPendingFeedingStart }) {
+  const theme = getTheme(baby);
   const [feedingType, setFeedingType] = useState('母乳');
   const [startTime, setStartTime] = useState(baby.pendingFeedingStart || '');
   const [endTime, setEndTime] = useState('');
-  const [duration, setDuration] = useState('');
   const [amount, setAmount] = useState('');
   const [note, setNote] = useState('');
   const [images, setImages] = useState([]);
   const [previewImage, setPreviewImage] = useState(null);
   const [editId, setEditId] = useState(null);
-  const themeColor = baby.gender === '女' ? '#F39AC3' : '#7BCEEA';
 
   useEffect(() => {
     setStartTime(baby.pendingFeedingStart || '');
@@ -26,7 +33,6 @@ export default function FeedingScreen({ baby, onAddFeeding, onUpdateFeeding, onD
     setFeedingType('母乳');
     setStartTime(baby.pendingFeedingStart || '');
     setEndTime('');
-    setDuration('');
     setAmount('');
     setNote('');
     setImages([]);
@@ -37,7 +43,6 @@ export default function FeedingScreen({ baby, onAddFeeding, onUpdateFeeding, onD
     setFeedingType(item.type || '母乳');
     setStartTime(item.startTime || '');
     setEndTime(item.endTime || '');
-    setDuration(item.duration || '');
     setAmount(item.amount || '');
     setNote(item.note || '');
     setImages(item.images || []);
@@ -79,7 +84,6 @@ export default function FeedingScreen({ baby, onAddFeeding, onUpdateFeeding, onD
           onPress: () => {
             setStartTime(now);
             setEndTime('');
-            setDuration('');
             onSetPendingFeedingStart?.(now);
             Alert.alert('已更新开始时间', now);
           },
@@ -89,7 +93,6 @@ export default function FeedingScreen({ baby, onAddFeeding, onUpdateFeeding, onD
     }
     setStartTime(now);
     setEndTime('');
-    setDuration('');
     onSetPendingFeedingStart?.(now);
     Alert.alert('已记录喂养开始时间', now);
   };
@@ -100,25 +103,7 @@ export default function FeedingScreen({ baby, onAddFeeding, onUpdateFeeding, onD
       return;
     }
     const now = formatDateTimeYYYYMMDDHHmm();
-    const newDuration = formatDuration(startTime, now);
     setEndTime(now);
-    setDuration(newDuration);
-    if (!isEditing) {
-      const payload = {
-        type: feedingType,
-        startTime,
-        endTime: now,
-        duration: newDuration,
-        amount,
-        note,
-        images,
-      };
-      onAddFeeding({ ...payload, createdAt: formatDateTimeYYYYMMDDHHmm(), recordType: '喂养' });
-      onSetPendingFeedingStart?.('');
-      Alert.alert('喂养记录已保存', newDuration || '已记录');
-      resetForm();
-      return;
-    }
     Alert.alert('已记录结束时间', now);
   };
 
@@ -168,369 +153,270 @@ export default function FeedingScreen({ baby, onAddFeeding, onUpdateFeeding, onD
   };
 
   const submit = () => {
-    if (!isEditing) return;
     if (!startTime || !endTime) {
       Alert.alert('请先完成开始时间和结束时间');
       return;
     }
-    const finalDuration = formatDuration(startTime, endTime);
-    const payload = { type: feedingType, startTime, endTime, duration: finalDuration, amount, note, images };
-    onUpdateFeeding(editId, payload);
-    Alert.alert('成功', '记录已更新', [{ text: '确定' }]);
+    const duration = formatDuration(startTime, endTime);
+    const payload = { type: feedingType, startTime, endTime, duration, amount, note, images };
+    if (isEditing) {
+      onUpdateFeeding(editId, payload);
+      Alert.alert('成功', '记录已更新', [{ text: '确定' }]);
+    } else {
+      onAddFeeding({ ...payload, createdAt: formatDateTimeYYYYMMDDHHmm(), recordType: '喂养' });
+      onSetPendingFeedingStart?.('');
+      Alert.alert('喂养记录已保存', duration || '已记录');
+    }
     resetForm();
   };
 
   return (
-    <ScrollView style={styles.page} contentContainerStyle={styles.contentContainer}>
-      <View style={styles.section}>
-        <Text style={styles.sectionTitle}>快速记录喂养</Text>
-        <View style={styles.row}> 
-          {['母乳', '奶粉'].map((item) => (
-            <Pressable
-              key={item}
-              onPress={() => setFeedingType(item)}
-              style={[styles.chip, feedingType === item && { backgroundColor: themeColor }]}
-            >
-              <Text style={[styles.chipText, feedingType === item && styles.chipActiveText]}>{item}</Text>
-            </Pressable>
-          ))}
-        </View>
-        <View style={styles.recordButtonRow}>
-          <Pressable style={[styles.recordButton, { backgroundColor: themeColor }]} onPress={handleRecordStart}>
-            <Text style={styles.recordButtonText}>喂养开始</Text>
-            <Text style={styles.recordButtonSub}>{startTime || '点击记录'}</Text>
-          </Pressable>
-          <View style={styles.durationBox}>
-            <Text style={styles.durationLabel}>时长</Text>
-            <Text style={styles.durationText}>{startTime ? feedingDuration : '待记录'}</Text>
+    <Screen baby={baby} title="喂奶" onBack={onBack}>
+      <ScrollView contentContainerStyle={styles.contentContainer}>
+        <Card baby={baby} style={styles.cardSpacing}>
+          <Text style={[styles.sectionTitle, { color: theme.colors.text }]}>快速记录喂养</Text>
+          <View style={styles.segmentRow}>
+            {['母乳', '奶粉'].map((item) => (
+              <Chip
+                key={item}
+                baby={baby}
+                label={item}
+                selected={feedingType === item}
+                onPress={() => setFeedingType(item)}
+                style={styles.segment}
+              />
+            ))}
           </View>
-          <Pressable style={[styles.recordButton, { backgroundColor: themeColor }]} onPress={handleRecordEnd}>
-            <Text style={styles.recordButtonText}>喂养结束</Text>
-            <Text style={styles.recordButtonSub}>{endTime || '点击记录'}</Text>
-          </Pressable>
-        </View>
-        {feedingType === '奶粉' && (
-          <View style={styles.fieldRow}>
-            <Text style={styles.fieldLabel}>奶量</Text>
-            <TextInput style={styles.fieldInput} value={amount} onChangeText={setAmount} placeholder="如 120ml" />
-          </View>
-        )}
-        <View style={styles.fieldRow}>
-          <Text style={styles.fieldLabel}>备注</Text>
-          <View style={styles.noteRow}>
-            <TextInput style={[styles.fieldInput, styles.textArea, styles.noteInput]} value={note} onChangeText={setNote} placeholder="如 夜奶、宝宝吃饱" multiline />
-            <Pressable style={[styles.imageButton, { backgroundColor: themeColor }]} onPress={selectImage}>
-              <Text style={styles.imageButtonText}>📷</Text>
-            </Pressable>
-          </View>
-        </View>
-        <Pressable style={[styles.saveButton, { backgroundColor: themeColor }]} onPress={submit}>
-          <Text style={styles.saveText}>{isEditing ? '保存修改' : '保存喂养记录'}</Text>
-        </Pressable>
-        {isEditing && (
-          <Pressable style={styles.cancelButton} onPress={resetForm}>
-            <Text style={styles.cancelText}>取消编辑</Text>
-          </Pressable>
-        )}
-      </View>
 
-      <View style={styles.section}>
-        <Text style={styles.sectionTitle}>历史喂养记录</Text>
-        {baby.feedingRecords.length === 0 ? (
-          <Text style={styles.emptyText}>还没有记录，立即添加一条。</Text>
-        ) : (
-          baby.feedingRecords.map((item) => (
-            <View key={item.id} style={styles.recordCard}>
-              <View style={styles.recordRow}>
-                <View style={styles.recordContent}>
-                  <Text style={styles.recordTitle}>{item.type} · {item.startTime}</Text>
-                  <Text style={styles.recordText}>时长：{item.duration || '未填'}  奶量：{item.amount || '--'}</Text>
-                  <Text style={styles.recordNote}>{item.note || '暂无备注'}</Text>
-                  {item.images && item.images.length > 0 && (
-                    <Pressable style={styles.thumbnailContainer} onPress={() => setPreviewImage(item.images[0])}>
-                      <Image source={{ uri: item.images[0] }} style={styles.recordThumbnail} />
-                      {item.images.length > 1 && <Text style={styles.imageCount}>{item.images.length}张</Text>}
-                    </Pressable>
-                  )}
-                </View>
-                <View style={styles.recordActions}>
-                  <Pressable style={[styles.actionButton, styles.editAction]} onPress={() => handleEdit(item)}>
-                    <Text style={styles.actionButtonText}>编辑</Text>
-                  </Pressable>
-                  <Pressable style={[styles.actionButton, styles.deleteAction]} onPress={() => confirmDelete(item.id)}>
-                    <Text style={styles.actionButtonText}>删除</Text>
-                  </Pressable>
-                </View>
+          <View style={styles.actionRow}>
+            <RoundActionButton baby={baby} title="喂养开始" subtitle={startTime || '点击记录'} onPress={handleRecordStart} />
+            <View style={styles.durationBox}>
+              <Text style={[styles.durationLabel, { color: theme.colors.textMuted }]}>时长</Text>
+              <Text style={[styles.durationText, { color: theme.colors.text }]}>{startTime ? feedingDuration : '待记录'}</Text>
+            </View>
+            <RoundActionButton baby={baby} title="喂养结束" subtitle={endTime || '点击记录'} onPress={handleRecordEnd} />
+          </View>
+
+          {feedingType === '奶粉' ? (
+            <View style={styles.fieldBlock}>
+              <Text style={[styles.fieldLabel, { color: theme.colors.textMuted }]}>奶量</Text>
+              <TextInput
+                style={[styles.fieldInput, { backgroundColor: theme.colors.surfaceSoft, color: theme.colors.text }]}
+                value={amount}
+                onChangeText={setAmount}
+                placeholder="如 150ml"
+                placeholderTextColor={theme.colors.placeholder}
+              />
+            </View>
+          ) : null}
+
+          <View style={styles.fieldBlock}>
+            <Text style={[styles.fieldLabel, { color: theme.colors.textMuted }]}>备注</Text>
+            <TextInput
+              style={[styles.fieldInput, styles.textArea, { backgroundColor: theme.colors.surfaceSoft, color: theme.colors.text }]}
+              value={note}
+              onChangeText={setNote}
+              placeholder="如 夜奶、宝宝吃饱"
+              placeholderTextColor={theme.colors.placeholder}
+              multiline
+            />
+          </View>
+
+          <View style={styles.imageRow}>
+            <Text style={[styles.fieldLabel, { color: theme.colors.textMuted }]}>图片</Text>
+            <Button baby={baby} label="+ 添加" size="md" onPress={selectImage} style={styles.addImageBtn} />
+          </View>
+          <ImageStrip
+            baby={baby}
+            images={images}
+            onPressImage={(uri) => setPreviewImage(uri)}
+            onRemoveImage={(index) => setImages((prev) => prev.filter((_, i) => i !== index))}
+          />
+
+          <Button baby={baby} label={isEditing ? '保存修改' : '保存喂养记录'} onPress={submit} />
+          {isEditing ? (
+            <Button baby={baby} label="取消编辑" variant="secondary" onPress={resetForm} style={styles.cancelBtn} />
+          ) : null}
+        </Card>
+
+        <Card baby={baby}>
+          <Text style={[styles.sectionTitle, { color: theme.colors.text }]}>历史喂养记录</Text>
+          {baby.feedingRecords.length === 0 ? (
+            <Text style={[styles.emptyText, { color: theme.colors.textSubtle }]}>暂无喂养记录</Text>
+          ) : (
+            baby.feedingRecords.map((item) => (
+              <Pressable
+                key={item.id}
+                onPress={() =>
+                  Alert.alert('记录操作', '请选择', [
+                    { text: '取消', style: 'cancel' },
+                    { text: '编辑', onPress: () => handleEdit(item) },
+                    { text: '删除', style: 'destructive', onPress: () => confirmDelete(item.id) },
+                  ])
+                }
+                style={[styles.recordItem, { backgroundColor: theme.colors.surfaceMuted }]}
+              >
+                <Text style={[styles.recordTitle, { color: theme.colors.text }]}>
+                  {item.type} · {item.createdAt}
+                </Text>
+                <Text style={[styles.recordText, { color: theme.colors.textMuted }]}>
+                  {item.startTime && item.endTime ? `${item.startTime} - ${item.endTime}` : ''}
+                  {item.duration ? ` · ${item.duration}` : ''}
+                  {item.amount ? ` · ${item.amount}` : ''}
+                </Text>
+                {item.note ? <Text style={[styles.recordNote, { color: theme.colors.textMuted }]}>备注：{item.note}</Text> : null}
+                {item.images?.length ? <ImageStrip baby={baby} images={item.images} onPressImage={setPreviewImage} /> : null}
+              </Pressable>
+            ))
+          )}
+
+          <Modal visible={!!previewImage} transparent animationType="fade">
+            <View style={styles.modalOverlay}>
+              <View style={styles.modalContent}>
+                <Pressable style={styles.modalClose} onPress={() => setPreviewImage(null)}>
+                  <Text style={[styles.modalCloseText, { color: theme.colors.text }]}>关闭</Text>
+                </Pressable>
+                {previewImage ? <Image source={{ uri: previewImage }} style={styles.modalImage} /> : null}
               </View>
             </View>
-          ))
-        )}
-        <Modal visible={!!previewImage} transparent animationType="fade">
-          <View style={styles.modalOverlay}>
-            <View style={styles.modalContent}>
-              <Pressable style={styles.modalClose} onPress={() => setPreviewImage(null)}>
-                <Text style={styles.modalCloseText}>关闭</Text>
-              </Pressable>
-              {previewImage && <Image source={{ uri: previewImage }} style={styles.modalImage} />}
-            </View>
-          </View>
-        </Modal>
-      </View>
-    </ScrollView>
+          </Modal>
+        </Card>
+      </ScrollView>
+    </Screen>
   );
 }
 
 const styles = StyleSheet.create({
-  page: {
-    marginTop:40,
-    flex: 1,
-    backgroundColor: '#F8F4EE',
-  },
   contentContainer: {
-    padding: 16,
-  },
-  section: {
-    backgroundColor: '#FFF',
-    borderRadius: 14,
-    padding: 16,
-    marginBottom: 16,
-    shadowColor: '#000',
-    shadowOpacity: 0.03,
-    shadowRadius: 8,
-    elevation: 2,
+    paddingBottom: space.xxl,
   },
   sectionTitle: {
-    fontSize: 16,
-    fontWeight: '700',
-    color: '#4A403A',
-    marginBottom: 12,
+    fontSize: fontSize.xl,
+    fontWeight: fontWeight.bold,
+    marginBottom: space.md,
   },
-  row: {
+  cardSpacing: {
+    marginBottom: space.lg,
+  },
+  segmentRow: {
     flexDirection: 'row',
-    justifyContent: 'space-between',
-    marginBottom: 12,
+    gap: space.md,
+    marginBottom: space.lg,
   },
-  chip: {
+  segment: {
     flex: 1,
-    marginHorizontal: 4,
     paddingVertical: 12,
-    borderRadius: 12,
-    backgroundColor: '#F0ECE7',
-    alignItems: 'center',
   },
-  chipActive: {
-    backgroundColor: '#7D5A50',
-  },
-  chipText: {
-    color: '#4A403A',
-    fontWeight: '600',
-  },
-  chipActiveText: {
-    color: '#fff',
-  },
-  fieldRow: {
-    marginBottom: 12,
-  },
-  fieldLabel: {
-    marginBottom: 6,
-    color: '#6E5D52',
-    fontSize: 13,
-  },
-  recordButtonRow: {
+  actionRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: 12,
-  },
-  recordButton: {
-    width: 90,
-    height: 90,
-    borderRadius: 45,
-    justifyContent: 'center',
-    alignItems: 'center',
-    padding: 12,
-    marginHorizontal: 4,
-  },
-  recordButtonText: {
-    color: '#fff',
-    fontSize: 13,
-    fontWeight: '700',
-    textAlign: 'center',
-    marginBottom: 4,
-  },
-  recordButtonSub: {
-    color: '#fff',
-    fontSize: 11,
-    textAlign: 'center',
+    marginBottom: space.lg,
   },
   durationBox: {
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    paddingHorizontal: 8,
+    paddingHorizontal: space.sm,
   },
   durationLabel: {
-    fontSize: 13,
-    color: '#6E5D52',
-    marginBottom: 4,
+    fontSize: fontSize.md,
+    fontWeight: fontWeight.medium,
+    marginBottom: space.xs,
   },
   durationText: {
-    color: '#4A403A',
-    fontSize: 16,
-    fontWeight: '700',
+    fontSize: fontSize.xl,
+    fontWeight: fontWeight.bold,
     textAlign: 'center',
   },
+  fieldBlock: {
+    marginBottom: space.lg,
+  },
+  fieldLabel: {
+    fontSize: fontSize.md,
+    fontWeight: fontWeight.medium,
+    marginBottom: space.sm,
+  },
   fieldInput: {
-    backgroundColor: '#F3ECE4',
-    borderRadius: 12,
-    padding: 12,
-    color: '#4A403A',
+    borderRadius: radius.lg,
+    paddingHorizontal: space.lg,
+    paddingVertical: 14,
+    fontSize: fontSize.md,
   },
   textArea: {
     minHeight: 80,
   },
-  noteRow: {
+  imageRow: {
     flexDirection: 'row',
-    alignItems: 'flex-end',
-    gap: 8,
-  },
-  noteInput: {
-    flex: 1,
-  },
-  imageButton: {
-    width: 48,
-    height: 48,
-    borderRadius: 8,
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginBottom: 0,
-  },
-  imageButtonText: {
-    fontSize: 20,
-  },
-  recordRow: {
-    flexDirection: 'row',
-    alignItems: 'flex-start',
     justifyContent: 'space-between',
-  },
-  recordContent: {
-    flex: 3,
-    marginRight: 12,
-  },
-  recordLeft: {
-    flex: 1,
-    marginRight: 10,
-  },
-  recordActions: {
-    width: 72,
-    justifyContent: 'space-between',
-  },
-  actionButton: {
-    borderRadius: 10,
-    minHeight: 30,
-    justifyContent: 'center',
     alignItems: 'center',
+    marginBottom: space.lg,
   },
-  editAction: {
-    backgroundColor: '#7BCEEA',
-        marginBottom:5,
-
+  addImageBtn: {
+    paddingHorizontal: space.lg,
   },
-  deleteAction: {
-    backgroundColor: '#FF6B6B',
+  cancelBtn: {
+    marginTop: space.md,
   },
-  actionButtonText: {
-    color: '#fff',
-    fontSize: 12,
-    fontWeight: '700',
+  recordItem: {
+    borderRadius: radius.lg,
+    padding: space.lg,
+    marginBottom: space.md,
   },
-  cancelButton: {
-    marginTop: 10,
-    backgroundColor: '#A08B7D',
-    borderRadius: 14,
-    paddingVertical: 14,
-    alignItems: 'center',
+  recordTitle: {
+    fontSize: fontSize.lg,
+    fontWeight: fontWeight.bold,
+    marginBottom: space.sm,
   },
-  cancelText: {
-    color: '#fff',
-    fontSize: 14,
-    fontWeight: '600',
+  recordText: {
+    fontSize: fontSize.md,
+    fontWeight: fontWeight.medium,
+    marginBottom: 4,
   },
-  thumbnailContainer: {
-    alignItems: 'center',
+  recordNote: {
+    fontSize: fontSize.md,
+    fontWeight: fontWeight.medium,
   },
-  recordThumbnail: {
-    width: 80,
-    height: 80,
-    borderRadius: 12,
+  emptyText: {
+    fontSize: fontSize.md,
+    fontWeight: fontWeight.medium,
   },
-  imageCount: {
-    marginTop: 6,
-    fontSize: 12,
-    color: '#7A6B62',
+  thumbWrap: {
+    width: 120,
+    height: 90,
+    borderRadius: radius.lg,
+    overflow: 'hidden',
+    marginTop: space.md,
+  },
+  thumb: {
+    width: '100%',
+    height: '100%',
   },
   modalOverlay: {
     flex: 1,
     backgroundColor: 'rgba(0,0,0,0.6)',
     justifyContent: 'center',
     alignItems: 'center',
-    padding: 20,
+    padding: space.lg,
   },
   modalContent: {
     width: '100%',
-    borderRadius: 16,
+    borderRadius: radius.xl,
     backgroundColor: '#fff',
-    padding: 12,
+    padding: space.md,
     alignItems: 'center',
   },
   modalImage: {
     width: '100%',
-    height: 300,
-    borderRadius: 14,
+    height: 320,
+    borderRadius: radius.lg,
   },
   modalClose: {
     alignSelf: 'flex-end',
-    padding: 8,
+    padding: space.sm,
   },
   modalCloseText: {
-    color: '#4A403A',
-    fontWeight: '700',
-  },
-  saveButton: {
-    backgroundColor: '#7D5A50',
-    borderRadius: 14,
-    paddingVertical: 14,
-    alignItems: 'center',
-    marginTop: 8,
-  },
-  saveText: {
-    color: '#fff',
-    fontSize: 15,
-    fontWeight: '700',
-  },
-  recordCard: {
-    backgroundColor: '#F7F2EE',
-    borderRadius: 14,
-    padding: 14,
-    marginBottom: 10,
-  },
-  recordTitle: {
-    fontSize: 14,
-    fontWeight: '700',
-    color: '#4A403A',
-    marginBottom: 6,
-  },
-  recordText: {
-    fontSize: 13,
-    color: '#7A6B62',
-    marginBottom: 6,
-  },
-  recordNote: {
-    fontSize: 12,
-    color: '#8D7F73',
-  },
-  emptyText: {
-    color: '#9D8F86',
-    fontSize: 14,
+    fontSize: fontSize.md,
+    fontWeight: fontWeight.bold,
   },
 });

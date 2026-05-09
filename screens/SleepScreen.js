@@ -1,9 +1,18 @@
-import React, { useState, useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { View, Text, StyleSheet, Pressable, TextInput, ScrollView, Alert, Modal, Image } from 'react-native';
 import * as ImagePicker from 'expo-image-picker';
 import { formatDateTimeYYYYMMDDHHmm } from '../utils/timeUtils';
+import Screen from '../ui/components/Screen';
+import Card from '../ui/components/Card';
+import Chip from '../ui/components/Chip';
+import Button from '../ui/components/Button';
+import RoundActionButton from '../ui/components/RoundActionButton';
+import ImageStrip from '../ui/components/ImageStrip';
+import { getTheme } from '../ui/theme';
+import { space, fontSize, fontWeight, radius } from '../ui/tokens';
 
-export default function SleepScreen({ baby, onAddSleep, onUpdateSleep, onDeleteSleep, onSetPendingSleepStart }) {
+export default function SleepScreen({ baby, onBack, onAddSleep, onUpdateSleep, onDeleteSleep, onSetPendingSleepStart }) {
+  const theme = getTheme(baby);
   const [sleepType, setSleepType] = useState('夜间睡眠');
   const [startTime, setStartTime] = useState(baby.pendingSleepStart || '');
   const [endTime, setEndTime] = useState('');
@@ -11,7 +20,6 @@ export default function SleepScreen({ baby, onAddSleep, onUpdateSleep, onDeleteS
   const [images, setImages] = useState([]);
   const [previewImage, setPreviewImage] = useState(null);
   const [editId, setEditId] = useState(null);
-  const themeColor = baby.gender === '女' ? '#F39AC3' : '#7BCEEA';
 
   useEffect(() => {
     setStartTime(baby.pendingSleepStart || '');
@@ -91,22 +99,7 @@ export default function SleepScreen({ baby, onAddSleep, onUpdateSleep, onDeleteS
     }
     const now = formatDateTimeYYYYMMDDHHmm();
     setEndTime(now);
-    const duration = formatDuration(startTime, now);
-    const payload = {
-      type: sleepType,
-      startTime,
-      endTime: now,
-      duration,
-      note,
-      images,
-    };
-    onAddSleep({ ...payload, createdAt: formatDateTimeYYYYMMDDHHmm(), recordType: '睡眠' });
-    onSetPendingSleepStart?.('');
-    Alert.alert('睡眠记录已保存', duration || '已记录');
-    setStartTime('');
-    setEndTime('');
-    setNote('');
-    setImages([]);
+    Alert.alert('已记录醒来时间', now);
   };
 
   const pickImage = async () => {
@@ -155,364 +148,254 @@ export default function SleepScreen({ baby, onAddSleep, onUpdateSleep, onDeleteS
   };
 
   const submit = () => {
-    if (!isEditing) return;
     if (!startTime || !endTime) {
       Alert.alert('请先完成入睡时间和醒来时间');
       return;
     }
     const duration = formatDuration(startTime, endTime);
     const payload = { type: sleepType, startTime, endTime, duration, note, images };
-    onUpdateSleep(editId, payload);
-    Alert.alert('成功', '记录已更新', [{ text: '确定' }]);
+    if (isEditing) {
+      onUpdateSleep(editId, payload);
+      Alert.alert('成功', '记录已更新', [{ text: '确定' }]);
+    } else {
+      onAddSleep({ ...payload, createdAt: formatDateTimeYYYYMMDDHHmm(), recordType: '睡眠' });
+      onSetPendingSleepStart?.('');
+      Alert.alert('睡眠记录已保存', duration || '已记录');
+    }
     resetForm();
   };
 
   return (
-    <ScrollView style={styles.page} contentContainerStyle={styles.contentContainer}>
-      <View style={styles.section}>
-        <Text style={styles.sectionTitle}>睡眠记录</Text>
-        <View style={styles.row}>
-          {['白天小睡', '夜间睡眠'].map((item) => (
-            <Pressable
-              key={item}
-              onPress={() => setSleepType(item)}
-              style={[styles.chip, sleepType === item && { backgroundColor: themeColor }]}
-            >
-              <Text style={[styles.chipText, sleepType === item && styles.chipActiveText]}>{item}</Text>
-            </Pressable>
-          ))}
-        </View>
-        <View style={styles.recordButtonRow}>
-          <Pressable style={[styles.recordButton, { backgroundColor: themeColor }]} onPress={handleRecordStart}>
-            <Text style={styles.recordButtonText}>记录入睡</Text>
-            <Text style={styles.recordButtonSub}>{startTime || '点击记录'}</Text>
-          </Pressable>
-          <View style={styles.durationBox}>
-            <Text style={styles.durationLabel}>睡眠时长</Text>
-            <Text style={styles.durationText}>{startTime ? sleepDuration : '待记录'}</Text>
+    <Screen baby={baby} title="睡眠" onBack={onBack}>
+      <ScrollView contentContainerStyle={styles.contentContainer}>
+        <Card baby={baby} style={styles.cardSpacing}>
+          <Text style={[styles.sectionTitle, { color: theme.colors.text }]}>睡眠记录</Text>
+          <View style={styles.segmentRow}>
+            {['白天小睡', '夜间睡眠'].map((item) => (
+              <Chip
+                key={item}
+                baby={baby}
+                label={item}
+                selected={sleepType === item}
+                onPress={() => setSleepType(item)}
+                style={styles.segment}
+              />
+            ))}
           </View>
-          <Pressable style={[styles.recordButton, { backgroundColor: themeColor }]} onPress={handleRecordEnd}>
-            <Text style={styles.recordButtonText}>记录醒来</Text>
-            <Text style={styles.recordButtonSub}>{endTime || '点击记录'}</Text>
-          </Pressable>
-        </View>
-        <View style={styles.fieldRow}>
-          <Text style={styles.fieldLabel}>备注</Text>
-          <View style={styles.noteRow}>
-            <TextInput style={[styles.fieldInput, styles.textArea, styles.noteInput]} value={note} onChangeText={setNote} placeholder="如 宝宝醒来时状态" multiline />
-            <Pressable style={[styles.imageButton, { backgroundColor: themeColor }]} onPress={selectImage}>
-              <Text style={styles.imageButtonText}>📷</Text>
-            </Pressable>
-          </View>
-        </View>
-        {isEditing && (
-          <Pressable style={[styles.saveButton, { backgroundColor: themeColor }]} onPress={submit}>
-            <Text style={styles.saveText}>保存修改</Text>
-          </Pressable>
-        )}
-        {isEditing && (
-          <Pressable style={styles.cancelButton} onPress={resetForm}>
-            <Text style={styles.cancelText}>取消编辑</Text>
-          </Pressable>
-        )}
-      </View>
 
-      <View style={styles.section}>
-        <Text style={styles.sectionTitle}>睡眠历史</Text>
-        {baby.sleepRecords.length === 0 ? (
-          <Text style={styles.emptyText}>暂无睡眠记录。</Text>
-        ) : (
-          baby.sleepRecords.map((item) => (
-            <View key={item.id} style={styles.recordCard}>
-              <View style={styles.recordRow}>
-                <View style={styles.recordContent}>
-                  <Text style={styles.recordTitle }>{item.type}</Text>
-                  <Text style={styles.recordText}>{item.startTime} - {item.endTime}</Text>
-                  <Text style={styles.recordText}>睡眠时长：{item.duration || item.quality || '暂无'}</Text>
-                  <Text style={styles.recordNote}>{item.note || '暂无备注'}</Text>
-                  {item.images && item.images.length > 0 && (
-                    <Pressable style={styles.thumbnailContainer} onPress={() => setPreviewImage(item.images[0])}>
-                      <Image source={{ uri: item.images[0] }} style={styles.recordThumbnail} />
-                      {item.images.length > 1 && <Text style={styles.imageCount}>{item.images.length}张</Text>}
-                    </Pressable>
-                  )}
-                </View>
-                <View style={styles.recordActions}>
-                  <Pressable style={[styles.actionButton, styles.editAction]} onPress={() => handleEdit(item)}>
-                    <Text style={styles.actionButtonText}>编辑</Text>
-                  </Pressable>
-                  <Pressable style={[styles.actionButton, styles.deleteAction]} onPress={() => confirmDelete(item.id)}>
-                    <Text style={styles.actionButtonText}>删除</Text>
-                  </Pressable>
-                </View>
+          <View style={styles.actionRow}>
+            <RoundActionButton baby={baby} title="记录入睡" subtitle={startTime || '点击记录'} onPress={handleRecordStart} />
+            <View style={styles.durationBox}>
+              <Text style={[styles.durationLabel, { color: theme.colors.textMuted }]}>睡眠时长</Text>
+              <Text style={[styles.durationText, { color: theme.colors.text }]}>{startTime ? sleepDuration : '待记录'}</Text>
+            </View>
+            <RoundActionButton baby={baby} title="记录醒来" subtitle={endTime || '点击记录'} onPress={handleRecordEnd} />
+          </View>
+
+          <View style={styles.fieldBlock}>
+            <Text style={[styles.fieldLabel, { color: theme.colors.textMuted }]}>备注</Text>
+            <TextInput
+              style={[styles.fieldInput, styles.textArea, { backgroundColor: theme.colors.surfaceSoft, color: theme.colors.text }]}
+              value={note}
+              onChangeText={setNote}
+              placeholder="如 宝宝醒来时状态"
+              placeholderTextColor={theme.colors.placeholder}
+              multiline
+            />
+          </View>
+
+          <View style={styles.imageRow}>
+            <Text style={[styles.fieldLabel, { color: theme.colors.textMuted }]}>图片</Text>
+            <Button baby={baby} label="+ 添加" size="md" onPress={selectImage} style={styles.addImageBtn} />
+          </View>
+          <ImageStrip
+            baby={baby}
+            images={images}
+            onPressImage={(uri) => setPreviewImage(uri)}
+            onRemoveImage={(index) => setImages((prev) => prev.filter((_, i) => i !== index))}
+          />
+
+          <Button baby={baby} label={isEditing ? '保存修改' : '保存睡眠记录'} onPress={submit} />
+          {isEditing ? (
+            <Button baby={baby} label="取消编辑" variant="secondary" onPress={resetForm} style={styles.cancelBtn} />
+          ) : null}
+        </Card>
+
+        <Card baby={baby}>
+          <Text style={[styles.sectionTitle, { color: theme.colors.text }]}>睡眠历史</Text>
+          {baby.sleepRecords.length === 0 ? (
+            <Text style={[styles.emptyText, { color: theme.colors.textSubtle }]}>暂无睡眠记录</Text>
+          ) : (
+            baby.sleepRecords.map((item) => (
+              <Pressable
+                key={item.id}
+                onPress={() =>
+                  Alert.alert('记录操作', '请选择', [
+                    { text: '取消', style: 'cancel' },
+                    { text: '编辑', onPress: () => handleEdit(item) },
+                    { text: '删除', style: 'destructive', onPress: () => confirmDelete(item.id) },
+                  ])
+                }
+                style={[styles.recordItem, { backgroundColor: theme.colors.surfaceMuted }]}
+              >
+                <Text style={[styles.recordTitle, { color: theme.colors.text }]}>{item.type}</Text>
+                <Text style={[styles.recordText, { color: theme.colors.textMuted }]}>
+                  {item.startTime && item.endTime ? `${item.startTime} - ${item.endTime}` : ''}
+                  {item.duration ? ` · ${item.duration}` : ''}
+                </Text>
+                {item.note ? <Text style={[styles.recordNote, { color: theme.colors.textMuted }]}>备注：{item.note}</Text> : null}
+                {item.images?.length ? <ImageStrip baby={baby} images={item.images} onPressImage={setPreviewImage} /> : null}
+              </Pressable>
+            ))
+          )}
+
+          <Modal visible={!!previewImage} transparent animationType="fade">
+            <View style={styles.modalOverlay}>
+              <View style={styles.modalContent}>
+                <Pressable style={styles.modalClose} onPress={() => setPreviewImage(null)}>
+                  <Text style={[styles.modalCloseText, { color: theme.colors.text }]}>关闭</Text>
+                </Pressable>
+                {previewImage ? <Image source={{ uri: previewImage }} style={styles.modalImage} /> : null}
               </View>
             </View>
-          ))
-        )}
-        <Modal visible={!!previewImage} transparent animationType="fade">
-          <View style={styles.modalOverlay}>
-            <View style={styles.modalContent}>
-              <Pressable style={styles.modalClose} onPress={() => setPreviewImage(null)}>
-                <Text style={styles.modalCloseText}>关闭</Text>
-              </Pressable>
-              {previewImage && <Image source={{ uri: previewImage }} style={styles.modalImage} />}
-            </View>
-          </View>
-        </Modal>
-      </View>
-    </ScrollView>
+          </Modal>
+        </Card>
+      </ScrollView>
+    </Screen>
   );
 }
 
 const styles = StyleSheet.create({
-  page: {
-    marginTop: 40,
-    flex: 1,
-    backgroundColor: '#F8F4EE',
-  },
   contentContainer: {
-    padding: 16,
-  },
-  section: {
-    backgroundColor: '#FFF',
-    borderRadius: 14,
-    padding: 16,
-    marginBottom: 16,
-    shadowColor: '#000',
-    shadowOpacity: 0.03,
-    shadowRadius: 8,
-    elevation: 2,
+    paddingBottom: space.xxl,
   },
   sectionTitle: {
-    fontSize: 16,
-    fontWeight: '700',
-    color: '#4A403A',
-    marginBottom: 12,
+    fontSize: fontSize.xl,
+    fontWeight: fontWeight.bold,
+    marginBottom: space.md,
   },
-  row: {
+  cardSpacing: {
+    marginBottom: space.lg,
+  },
+  segmentRow: {
     flexDirection: 'row',
-    justifyContent: 'space-between',
-    marginBottom: 12,
+    gap: space.md,
+    marginBottom: space.lg,
   },
-  chip: {
+  segment: {
     flex: 1,
-    marginHorizontal: 4,
     paddingVertical: 12,
-    borderRadius: 12,
-    backgroundColor: '#F0ECE7',
-    alignItems: 'center',
   },
-  chipActive: {
-    backgroundColor: '#7D5A50',
-  },
-  chipText: {
-    color: '#4A403A',
-    fontWeight: '600',
-  },
-  chipActiveText: {
-    color: '#fff',
-  },
-  fieldRow: {
-    marginBottom: 12,
-  },
-  fieldLabel: {
-    marginBottom: 6,
-    color: '#6E5D52',
-    fontSize: 13,
-  },
-  recordButtonRow: {
+  actionRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: 12,
-  },
-  recordButton: {
-    width: 90,
-    height: 90,
-    borderRadius: 45,
-    justifyContent: 'center',
-    alignItems: 'center',
-    padding: 12,
-    marginHorizontal: 4,
-  },
-  recordButtonText: {
-    color: '#fff',
-    fontSize: 13,
-    fontWeight: '700',
-    textAlign: 'center',
-    marginBottom: 4,
-  },
-  recordButtonSub: {
-    color: '#fff',
-    fontSize: 11,
-    textAlign: 'center',
+    marginBottom: space.lg,
   },
   durationBox: {
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    paddingHorizontal: 8,
+    paddingHorizontal: space.sm,
   },
   durationLabel: {
-    fontSize: 13,
-    color: '#6E5D52',
-    marginBottom: 4,
+    fontSize: fontSize.md,
+    fontWeight: fontWeight.medium,
+    marginBottom: space.xs,
   },
   durationText: {
-    color: '#4A403A',
-    fontSize: 16,
-    fontWeight: '700',
+    fontSize: fontSize.xl,
+    fontWeight: fontWeight.bold,
     textAlign: 'center',
   },
+  fieldBlock: {
+    marginBottom: space.lg,
+  },
+  fieldLabel: {
+    fontSize: fontSize.md,
+    fontWeight: fontWeight.medium,
+    marginBottom: space.sm,
+  },
   fieldInput: {
-    backgroundColor: '#F3ECE4',
-    borderRadius: 12,
-    padding: 12,
-    color: '#4A403A',
+    borderRadius: radius.lg,
+    paddingHorizontal: space.lg,
+    paddingVertical: 14,
+    fontSize: fontSize.md,
   },
   textArea: {
     minHeight: 80,
   },
-  noteRow: {
+  imageRow: {
     flexDirection: 'row',
-    alignItems: 'flex-end',
-  },
-  noteInput: {
-    flex: 1,
-    marginRight: 8,
-  },
-  imageButton: {
-    width: 48,
-    height: 48,
-    borderRadius: 8,
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginBottom: 0,
-  },
-  imageButtonText: {
-    fontSize: 20,
-  },
-  recordRow: {
-    flexDirection: 'row',
-    alignItems: 'flex-start',
     justifyContent: 'space-between',
-  },
-  recordContent: {
-    flex: 3,
-    marginRight: 12,
-  },
-  recordLeft: {
-    flex: 1,
-    marginRight: 10,
-  },
-  recordActions: {
-    width: 72,
-    justifyContent: 'space-between',
-  },
-  actionButton: {
-    borderRadius: 10,
-    minHeight: 30,
-    justifyContent: 'center',
     alignItems: 'center',
+    marginBottom: space.lg,
   },
-  editAction: {
-    backgroundColor: '#7BCEEA',
-        marginBottom:5,
-
+  addImageBtn: {
+    paddingHorizontal: space.lg,
   },
-  deleteAction: {
-    backgroundColor: '#FF6B6B',
+  cancelBtn: {
+    marginTop: space.md,
   },
-  actionButtonText: {
-    color: '#fff',
-    fontSize: 12,
-    fontWeight: '700',
+  recordItem: {
+    borderRadius: radius.lg,
+    padding: space.lg,
+    marginBottom: space.md,
   },
-  cancelButton: {
-    marginTop: 10,
-    backgroundColor: '#A08B7D',
-    borderRadius: 14,
-    paddingVertical: 14,
-    alignItems: 'center',
+  recordTitle: {
+    fontSize: fontSize.lg,
+    fontWeight: fontWeight.bold,
+    marginBottom: space.sm,
   },
-  cancelText: {
-    color: '#fff',
-    fontSize: 14,
-    fontWeight: '600',
+  recordText: {
+    fontSize: fontSize.md,
+    fontWeight: fontWeight.medium,
+    marginBottom: 4,
   },
-  thumbnailContainer: {
-    alignItems: 'center',
+  recordNote: {
+    fontSize: fontSize.md,
+    fontWeight: fontWeight.medium,
   },
-  recordThumbnail: {
-    width: 80,
-    height: 80,
-    borderRadius: 12,
+  emptyText: {
+    fontSize: fontSize.md,
+    fontWeight: fontWeight.medium,
   },
-  imageCount: {
-    marginTop: 6,
-    fontSize: 12,
-    color: '#7A6B62',
+  thumbWrap: {
+    width: 120,
+    height: 90,
+    borderRadius: radius.lg,
+    overflow: 'hidden',
+    marginTop: space.md,
+  },
+  thumb: {
+    width: '100%',
+    height: '100%',
   },
   modalOverlay: {
     flex: 1,
     backgroundColor: 'rgba(0,0,0,0.6)',
     justifyContent: 'center',
     alignItems: 'center',
-    padding: 20,
+    padding: space.lg,
   },
   modalContent: {
     width: '100%',
-    borderRadius: 16,
+    borderRadius: radius.xl,
     backgroundColor: '#fff',
-    padding: 12,
+    padding: space.md,
     alignItems: 'center',
   },
   modalImage: {
     width: '100%',
-    height: 300,
-    borderRadius: 14,
+    height: 320,
+    borderRadius: radius.lg,
   },
   modalClose: {
     alignSelf: 'flex-end',
-    padding: 8,
+    padding: space.sm,
   },
   modalCloseText: {
-    color: '#4A403A',
-    fontWeight: '700',
-  },
-  saveButton: {
-    borderRadius: 14,
-    paddingVertical: 14,
-    alignItems: 'center',
-    marginTop: 8,
-  },
-  saveText: {
-    color: '#fff',
-    fontSize: 15,
-    fontWeight: '700',
-  },
-  recordCard: {
-    backgroundColor: '#F7F2EE',
-    borderRadius: 14,
-    padding: 14,
-    marginBottom: 10,
-  },
-  recordTitle: {
-    fontSize: 14,
-    fontWeight: '700',
-    color: '#4A403A',
-    marginBottom: 6,
-  },
-  recordText: {
-    fontSize: 13,
-    color: '#7A6B62',
-  },
-    recordNote: {
-    fontSize: 12,
-    color: '#8D7F73',
-  },
-  emptyText: {
-    color: '#9D8F86',
-    fontSize: 14,
+    fontSize: fontSize.md,
+    fontWeight: fontWeight.bold,
   },
 });

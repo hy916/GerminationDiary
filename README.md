@@ -15,12 +15,12 @@
     <a href="https://github.com/hy916/SproutDiary/releases">
       <img src="https://img.shields.io/github/v/release/hy916/SproutDiary?color=3b82f6" alt="Release" />
     </a>
-    <a href="https://jaywcjlove.github.io/maslink/?id=6758053530">
+    <!-- <a href="https://jaywcjlove.github.io/maslink/?id=6758053530">
       <img src="https://img.shields.io/badge/Downloads-Android-363b44?logo=Android&logoColor=white" alt="Sprout Diary Android" />
     </a>
     <a href="https://jaywcjlove.github.io/maslink/?id=6758053530">
       <img src="https://img.shields.io/badge/Downloads-iOS-363b44?logo=AppStore&logoColor=white" alt="Sprout Diary iOS" />
-    </a>
+    </a> -->
   </p>
   <p>
     <a href="./README.zh.md">简体中文</a> • 

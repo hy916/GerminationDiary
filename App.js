@@ -1,6 +1,8 @@
-import React, { useState } from 'react';
-import {  StyleSheet, View, Text, Pressable, ScrollView } from 'react-native';
+import React, { useEffect, useMemo, useState } from 'react';
+import { StyleSheet, View, ActivityIndicator, Alert } from 'react-native';
 import HomeScreen from './screens/HomeScreen';
+import RecordsScreen from './screens/RecordsScreen';
+import MeScreen from './screens/MeScreen';
 import BabyProfileScreen from './screens/BabyProfileScreen';
 import FeedingScreen from './screens/FeedingScreen';
 import SleepScreen from './screens/SleepScreen';
@@ -9,7 +11,17 @@ import GrowthScreen from './screens/GrowthScreen';
 import VaccineScreen from './screens/VaccineScreen';
 import IllnessScreen from './screens/IllnessScreen';
 import FetalScreen from './screens/FetalScreen';
-import SettingsScreen from './screens/SettingsScreen';
+import BottomTabBar from './ui/components/BottomTabBar';
+import { formatDateTimeYYYYMMDDHHmm } from './utils/timeUtils';
+import {
+  clearRecordsForBabyFromDb,
+  deleteRecordFromDb,
+  getBabiesFromDb,
+  initDb,
+  insertRecordToDb,
+  updateRecordToDb,
+  upsertBabyToDb,
+} from './data/db';
 
 const initialBaby = {
   id: 'baby-1',
@@ -17,6 +29,7 @@ const initialBaby = {
   gender: '女',
   birthday: '2025-12-01',
   avatar: '',
+  createdAt: new Date().toISOString(),
   birthInfo: {
     weight: '3200g',
     length: '50cm',
@@ -34,27 +47,99 @@ const initialBaby = {
   pendingFeedingStart: '',
 };
 
-const pages = [
-  { key: 'Home', label: '首页' },
-  { key: 'Settings', label: '我的' },
+const tabs = [
+  { key: 'Home', label: '首页', icon: '⌂' },
+  { key: 'Records', label: '记录', icon: '≡' },
+  { key: 'Me', label: '我的', icon: '☺' },
 ];
 
 export default function App() {
-  const [page, setPage] = useState('Home');
-  const [babies, setBabies] = useState([initialBaby]);
-  const [selectedBabyId, setSelectedBabyId] = useState(initialBaby.id);
+  const [stack, setStack] = useState([{ name: 'Home' }]);
+  const [babies, setBabies] = useState([]);
+  const [selectedBabyId, setSelectedBabyId] = useState('');
+  const [ready, setReady] = useState(false);
 
-  const currentBaby = babies.find((item) => item.id === selectedBabyId) || babies[0];
-  const themeColor = currentBaby.gender === '女' ? '#F39AC3' : '#7BCEEA';
+  const route = stack[stack.length - 1];
+  const activeTabKey = stack[0]?.name || 'Home';
+  const showTabBar = true;
 
-  const updateBaby = (updated) => {
-    setBabies((prev) => prev.map((baby) => (baby.id === updated.id ? { ...baby, ...updated } : baby)));
+  const currentBaby = useMemo(() => {
+    if (!babies.length) return initialBaby;
+    return babies.find((item) => item.id === selectedBabyId) || babies[0] || initialBaby;
+  }, [babies, selectedBabyId]);
+
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      await initDb();
+      const loaded = await getBabiesFromDb();
+      if (cancelled) return;
+      if (!loaded.length) {
+        await upsertBabyToDb(initialBaby);
+        setBabies([initialBaby]);
+        setSelectedBabyId(initialBaby.id);
+      } else {
+        setBabies(loaded);
+        setSelectedBabyId(loaded[0].id);
+      }
+      setReady(true);
+    })().catch((err) => {
+      if (!cancelled) {
+        Alert.alert('数据库初始化失败', err?.message || String(err));
+        setBabies([initialBaby]);
+        setSelectedBabyId(initialBaby.id);
+        setReady(true);
+      }
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  const navigate = (name) => {
+    if (tabs.some((t) => t.key === name)) {
+      setStack([{ name }]);
+      return;
+    }
+    setStack((prev) => [...prev, { name }]);
   };
 
-  const addBaby = (baby) => {
+  const goBack = () => {
+    setStack((prev) => (prev.length > 1 ? prev.slice(0, -1) : prev));
+  };
+
+  const updateSelectedBaby = async (partial) => {
+    const babyId = selectedBabyId || currentBaby.id;
+    if (!selectedBabyId) setSelectedBabyId(babyId);
+
+    let next = null;
+    setBabies((prev) => {
+      const list = prev.length ? prev : [currentBaby];
+      const hasTarget = list.some((b) => b.id === babyId);
+      if (!hasTarget) {
+        next = { ...currentBaby, ...partial, id: babyId };
+        return list;
+      }
+      return list.map((b) => {
+        if (b.id !== babyId) return b;
+        next = { ...b, ...partial };
+        return next;
+      });
+    });
+
+    await upsertBabyToDb(next || { ...currentBaby, ...partial, id: babyId });
+  };
+
+  const updateBaby = async (updated) => {
+    await updateSelectedBaby(updated);
+  };
+
+  const addBaby = async (baby) => {
     const newBaby = {
       ...baby,
       id: `baby-${Date.now()}`,
+      createdAt: new Date().toISOString(),
+      avatar: baby.avatar || '',
       feedingRecords: [],
       sleepRecords: [],
       diaperRecords: [],
@@ -66,86 +151,106 @@ export default function App() {
       pendingFeedingStart: '',
       birthInfo: baby.birthInfo || {},
     };
+    await upsertBabyToDb(newBaby);
     setBabies((prev) => [...prev, newBaby]);
     setSelectedBabyId(newBaby.id);
   };
 
-  const addRecord = (type, record) => {
+  const addRecord = async (module, record) => {
+    const babyId = selectedBabyId || currentBaby.id;
+    if (!selectedBabyId) setSelectedBabyId(babyId);
+
+    const id = `${module}-${Date.now()}`;
+    const createdAt = record.createdAt || formatDateTimeYYYYMMDDHHmm();
+    const full = { ...record, id, createdAt };
+
     setBabies((prev) =>
-      prev.map((baby) => {
-        if (baby.id !== selectedBabyId) return baby;
-        const updated = { ...baby };
-        updated[`${type}Records`] = [{ id: `${type}-${Date.now()}`, ...record }, ...(baby[`${type}Records`] || [])];
-        return updated;
+      (prev.length ? prev : [currentBaby]).map((baby) => {
+        if (baby.id !== babyId) return baby;
+        const key = `${module}Records`;
+        return { ...baby, [key]: [full, ...(baby[key] || [])] };
       }),
     );
+
+    await insertRecordToDb({ babyId, type: module, record: full });
   };
 
-  const updateRecord = (type, recordId, updatedFields) => {
+  const updateRecord = async (module, recordId, updatedFields) => {
+    const babyId = selectedBabyId || currentBaby.id;
+    if (!selectedBabyId) setSelectedBabyId(babyId);
     setBabies((prev) =>
-      prev.map((baby) => {
-        if (baby.id !== selectedBabyId) return baby;
-        const updated = { ...baby };
-        updated[`${type}Records`] = (baby[`${type}Records`] || []).map((record) =>
-          record.id === recordId ? { ...record, ...updatedFields } : record,
-        );
-        return updated;
+      (prev.length ? prev : [currentBaby]).map((baby) => {
+        if (baby.id !== babyId) return baby;
+        const key = `${module}Records`;
+        return {
+          ...baby,
+          [key]: (baby[key] || []).map((r) => (r.id === recordId ? { ...r, ...updatedFields } : r)),
+        };
       }),
     );
+    await updateRecordToDb({ recordId, babyId, type: module, updatedFields });
   };
 
-  const deleteRecord = (type, recordId) => {
+  const deleteRecord = async (module, recordId) => {
+    const babyId = selectedBabyId || currentBaby.id;
+    if (!selectedBabyId) setSelectedBabyId(babyId);
     setBabies((prev) =>
-      prev.map((baby) => {
-        if (baby.id !== selectedBabyId) return baby;
-        const updated = { ...baby };
-        updated[`${type}Records`] = (baby[`${type}Records`] || []).filter((record) => record.id !== recordId);
-        return updated;
+      (prev.length ? prev : [currentBaby]).map((baby) => {
+        if (baby.id !== babyId) return baby;
+        const key = `${module}Records`;
+        return { ...baby, [key]: (baby[key] || []).filter((r) => r.id !== recordId) };
       }),
     );
+    await deleteRecordFromDb({ recordId, babyId });
   };
 
-  const setPendingSleepStart = (value) => {
-    setBabies((prev) =>
-      prev.map((baby) =>
-        baby.id === selectedBabyId ? { ...baby, pendingSleepStart: value } : baby,
-      ),
-    );
+  const setPendingSleepStart = async (value) => {
+    await updateSelectedBaby({ pendingSleepStart: value });
   };
 
-  const setPendingFeedingStart = (value) => {
-    setBabies((prev) =>
-      prev.map((baby) =>
-        baby.id === selectedBabyId ? { ...baby, pendingFeedingStart: value } : baby,
-      ),
-    );
+  const setPendingFeedingStart = async (value) => {
+    await updateSelectedBaby({ pendingFeedingStart: value });
   };
 
-  const clearRecords = () => {
-    setBabies((prev) =>
-      prev.map((baby) =>
-        baby.id === selectedBabyId
-          ? {
-              ...baby,
-              feedingRecords: [],
-              sleepRecords: [],
-              diaperRecords: [],
-              growthRecords: [],
-              vaccineRecords: [],
-              illnessRecords: [],
-              fetalRecords: [],
-              pendingSleepStart: '',
-              pendingFeedingStart: '',
-            }
-          : baby,
-      ),
-    );
+  const clearRecords = async () => {
+    Alert.alert('确认清空', '确认要清空所有记录吗？此操作不可撤销。', [
+      { text: '取消', style: 'cancel' },
+      {
+        text: '确定',
+        style: 'destructive',
+        onPress: async () => {
+          await clearRecordsForBabyFromDb(selectedBabyId);
+          setBabies((prev) =>
+            prev.map((baby) =>
+              baby.id === selectedBabyId
+                ? {
+                    ...baby,
+                    feedingRecords: [],
+                    sleepRecords: [],
+                    diaperRecords: [],
+                    growthRecords: [],
+                    vaccineRecords: [],
+                    illnessRecords: [],
+                    fetalRecords: [],
+                    pendingSleepStart: '',
+                    pendingFeedingStart: '',
+                  }
+                : baby,
+            ),
+          );
+        },
+      },
+    ]);
   };
 
   const renderScreen = () => {
-    switch (page) {
+    switch (route.name) {
       case 'Home':
-        return <HomeScreen baby={currentBaby} onNavigate={setPage} />;
+        return <HomeScreen baby={currentBaby} onNavigate={navigate} />;
+      case 'Records':
+        return <RecordsScreen baby={currentBaby} onNavigate={navigate} />;
+      case 'Me':
+        return <MeScreen baby={currentBaby} onNavigate={navigate} onClearRecords={clearRecords} />;
       case 'Profile':
         return (
           <BabyProfileScreen
@@ -154,11 +259,13 @@ export default function App() {
             onSwitchBaby={setSelectedBabyId}
             onAddBaby={addBaby}
             onUpdateBaby={updateBaby}
+            onBack={goBack}
           />
         );
       case 'Feeding':
         return <FeedingScreen
           baby={currentBaby}
+          onBack={goBack}
           onAddFeeding={(record) => addRecord('feeding', record)}
           onUpdateFeeding={(id, record) => updateRecord('feeding', id, record)}
           onDeleteFeeding={(id) => deleteRecord('feeding', id)}
@@ -167,6 +274,7 @@ export default function App() {
       case 'Sleep':
         return <SleepScreen
           baby={currentBaby}
+          onBack={goBack}
           onAddSleep={(record) => addRecord('sleep', record)}
           onUpdateSleep={(id, record) => updateRecord('sleep', id, record)}
           onDeleteSleep={(id) => deleteRecord('sleep', id)}
@@ -175,6 +283,7 @@ export default function App() {
       case 'Diaper':
         return <DiaperScreen
           baby={currentBaby}
+          onBack={goBack}
           onAddDiaper={(record) => addRecord('diaper', record)}
           onUpdateDiaper={(id, record) => updateRecord('diaper', id, record)}
           onDeleteDiaper={(id) => deleteRecord('diaper', id)}
@@ -182,6 +291,7 @@ export default function App() {
       case 'Growth':
         return <GrowthScreen
           baby={currentBaby}
+          onBack={goBack}
           onAddGrowth={(record) => addRecord('growth', record)}
           onUpdateGrowth={(id, record) => updateRecord('growth', id, record)}
           onDeleteGrowth={(id) => deleteRecord('growth', id)}
@@ -189,6 +299,7 @@ export default function App() {
       case 'Vaccine':
         return <VaccineScreen
           baby={currentBaby}
+          onBack={goBack}
           onAddVaccine={(record) => addRecord('vaccine', record)}
           onUpdateVaccine={(id, record) => updateRecord('vaccine', id, record)}
           onDeleteVaccine={(id) => deleteRecord('vaccine', id)}
@@ -196,6 +307,7 @@ export default function App() {
       case 'Illness':
         return <IllnessScreen
           baby={currentBaby}
+          onBack={goBack}
           onAddIllness={(record) => addRecord('illness', record)}
           onUpdateIllness={(id, record) => updateRecord('illness', id, record)}
           onDeleteIllness={(id) => deleteRecord('illness', id)}
@@ -203,27 +315,30 @@ export default function App() {
       case 'Fetal':
         return <FetalScreen
           baby={currentBaby}
+          onBack={goBack}
           onAddFetal={(record) => addRecord('fetal', record)}
           onUpdateFetal={(id, record) => updateRecord('fetal', id, record)}
           onDeleteFetal={(id) => deleteRecord('fetal', id)}
         />;
-      case 'Settings':
-        return <SettingsScreen baby={currentBaby} onClearRecords={clearRecords} onUpdateBaby={updateBaby} onNavigate={setPage}/>;
       default:
-        return <HomeScreen baby={currentBaby} onNavigate={setPage} />;
+        return <HomeScreen baby={currentBaby} onNavigate={navigate} />;
     }
   };
+
+  if (!ready) {
+    return (
+      <View style={styles.loading}>
+        <ActivityIndicator size="large" />
+      </View>
+    );
+  }
 
   return (
     <View style={styles.container}>
       <View style={styles.screenContainer}>{renderScreen()}</View>
-      <View style={[styles.tabBar, { backgroundColor: themeColor }]}> 
-          {pages.map((item) => (
-            <Pressable key={item.key} onPress={() => setPage(item.key)} style={[styles.tabItem, page === item.key && styles.activeTab]}>
-              <Text style={[styles.tabLabel, page === item.key && styles.activeTabLabel]}>{item.label}</Text>
-            </Pressable>
-          ))}
-      </View>
+      {showTabBar ? (
+        <BottomTabBar baby={currentBaby} tabs={tabs} activeKey={activeTabKey} onPressTab={navigate} />
+      ) : null}
     </View>
   );
 }
@@ -236,35 +351,10 @@ const styles = StyleSheet.create({
   screenContainer: {
     flex: 1,
   },
-  tabBar: {
-    borderTopWidth: 0,
-    backgroundColor: '#fff',
-    flexDirection: 'row',
-    justifyContent: 'center',
-    alignItems: 'stretch',
-    height: 60,
-  },
-  tabScroll: {
-    alignItems: 'center',
-    justifyContent: 'center',
-    flexGrow: 1,
-  },
-  tabItem: {
+  loading: {
     flex: 1,
-    justifyContent: 'center',
     alignItems: 'center',
-    paddingHorizontal: 20,
-    borderRadius: 0,
-  },
-  activeTab: {
-    backgroundColor: 'rgba(255,255,255,0.4)',
-  },
-  tabLabel: {
-    color: '#fff',
-    fontSize: 16,
-    fontWeight: '600',
-  },
-  activeTabLabel: {
-    color: '#fff',
+    justifyContent: 'center',
+    backgroundColor: '#F8F4EE',
   },
 });

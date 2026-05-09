@@ -2,9 +2,14 @@ import React, { useState, useEffect } from 'react';
 import { StyleSheet, View, Text, ScrollView, TextInput, Pressable, Alert, Modal, FlatList, Image } from 'react-native';
 import * as ImagePicker from 'expo-image-picker';
 import { calculateFetalWeight, classifyFetalWeight, getFetalWeightReference } from '../utils/fetalCalculator';
+import Screen from '../ui/components/Screen';
+import Button from '../ui/components/Button';
+import { getTheme } from '../ui/theme';
+import { colors, fontSize, fontWeight, radius, shadow, space } from '../ui/tokens';
 
-export default function FetalScreen({ baby, onAddFetal, onUpdateFetal, onDeleteFetal }) {
-  const themeColor = baby.gender === '女' ? '#F39AC3' : '#7BCEEA';
+export default function FetalScreen({ baby, onBack, onAddFetal, onUpdateFetal, onDeleteFetal }) {
+  const theme = getTheme(baby);
+  const themeColor = theme.colors.accent;
   const [records, setRecords] = useState(baby.fetalRecords || []);
   const [showForm, setShowForm] = useState(false);
   const [editingId, setEditingId] = useState(null);
@@ -235,58 +240,69 @@ export default function FetalScreen({ baby, onAddFetal, onUpdateFetal, onDeleteF
   };
 
   return (
-    <ScrollView style={styles.container}>
-      <View style={styles.header}>
-        <Text style={styles.title}>孕期胎儿记录</Text>
-        <Pressable style={[styles.addButton, { backgroundColor: themeColor }]} onPress={handleAddNew}>
-          <Text style={styles.addButtonText}>+ 新建记录</Text>
-        </Pressable>
-      </View>
+    <Screen
+      baby={baby}
+      title="孕胎记录"
+      onBack={onBack}
+      right={(
+        <Button baby={baby} label="+ 新建" size="md" onPress={handleAddNew} />
+      )}
+      padded={false}
+    >
+      <ScrollView contentContainerStyle={styles.container}>
 
       {/* 记录列表 */}
       {records.length > 0 ? (
         <View style={styles.recordsList}>
           {records.map((record) => (
-            <View key={record.id} style={[styles.recordCard, { borderLeftColor: themeColor }]}>
+            <View
+              key={record.id}
+              style={[
+                styles.recordCard,
+                { borderLeftColor: themeColor, backgroundColor: theme.colors.surface },
+              ]}
+            >
               <View style={styles.recordHeader}>
-                <Text style={styles.recordTitle}>
+                <Text style={[styles.recordTitle, { color: theme.colors.text }]}>
                   孕周 {record.gestationalWeek} 周 · {record.date}
                 </Text>
               </View>
 
               <View style={styles.recordContent}>
                 <View style={styles.infoRow}>
-                  <Text style={styles.label}>双顶径 (BPD):</Text>
-                  <Text style={styles.value}>{record.bpd}mm</Text>
+                  <Text style={[styles.label, { color: theme.colors.textMuted }]}>双顶径 (BPD):</Text>
+                  <Text style={[styles.value, { color: theme.colors.text }]}>{record.bpd}mm</Text>
                 </View>
                 <View style={styles.infoRow}>
-                  <Text style={styles.label}>头围 (HC):</Text>
-                  <Text style={styles.value}>{record.hc}mm</Text>
+                  <Text style={[styles.label, { color: theme.colors.textMuted }]}>头围 (HC):</Text>
+                  <Text style={[styles.value, { color: theme.colors.text }]}>{record.hc}mm</Text>
                 </View>
                 <View style={styles.infoRow}>
-                  <Text style={styles.label}>腹围 (AC):</Text>
-                  <Text style={styles.value}>{record.ac}mm</Text>
+                  <Text style={[styles.label, { color: theme.colors.textMuted }]}>腹围 (AC):</Text>
+                  <Text style={[styles.value, { color: theme.colors.text }]}>{record.ac}mm</Text>
                 </View>
                 <View style={styles.infoRow}>
-                  <Text style={styles.label}>股骨径 (FL):</Text>
-                  <Text style={styles.value}>{record.fl}mm</Text>
+                  <Text style={[styles.label, { color: theme.colors.textMuted }]}>股骨径 (FL):</Text>
+                  <Text style={[styles.value, { color: theme.colors.text }]}>{record.fl}mm</Text>
                 </View>
                 {record.fhr && (
                   <View style={styles.infoRow}>
-                    <Text style={styles.label}>胎心率:</Text>
-                    <Text style={styles.value}>{record.fhr} bpm</Text>
+                    <Text style={[styles.label, { color: theme.colors.textMuted }]}>胎心率:</Text>
+                    <Text style={[styles.value, { color: theme.colors.text }]}>{record.fhr} bpm</Text>
                   </View>
                 )}
 
                 {record.estimatedWeight && (
-                  <View style={[styles.infoRow, styles.weightRow]}>
+                  <View style={[styles.infoRow, styles.weightRow, { borderTopColor: colors.border }]}>
                     <View>
-                      <Text style={styles.label}>估计体重:</Text>
-                      <Text style={styles.weightValue}>{record.estimatedWeight}g</Text>
-                      <Text style={styles.weightFormula}>({record.weightFormula}公式)</Text>
+                      <Text style={[styles.label, { color: theme.colors.textMuted }]}>估计体重:</Text>
+                      <Text style={[styles.weightValue, { color: themeColor }]}>{record.estimatedWeight}g</Text>
+                      <Text style={[styles.weightFormula, { color: theme.colors.textSubtle }]}>
+                        ({record.weightFormula}公式)
+                      </Text>
                     </View>
-                    <View style={styles.classificationBadge}>
-                      <Text style={styles.classificationText}>
+                    <View style={[styles.classificationBadge, { backgroundColor: theme.colors.surfaceSoft }]}>
+                      <Text style={[styles.classificationText, { color: theme.colors.textMuted }]}>
                         {record.weightClassification}
                       </Text>
                     </View>
@@ -305,31 +321,16 @@ export default function FetalScreen({ baby, onAddFetal, onUpdateFetal, onDeleteF
 
                 {record.notes && (
                   <View style={styles.notesRow}>
-                    <Text style={styles.label}>备注:</Text>
-                    <Text style={styles.notes}>{record.notes}</Text>
+                    <Text style={[styles.label, { color: theme.colors.textMuted }]}>备注:</Text>
+                    <Text style={[styles.notes, { color: theme.colors.textMuted }]}>{record.notes}</Text>
                   </View>
                 )}
               </View>
 
               <View style={styles.recordActions}>
-                <Pressable
-                  style={[styles.actionButton, styles.calculateButton]}
-                  onPress={() => handleShowCalculator(record)}
-                >
-                  <Text style={styles.actionButtonText}>📊 查看详情</Text>
-                </Pressable>
-                <Pressable
-                  style={[styles.actionButton, styles.editButton]}
-                  onPress={() => handleEdit(record)}
-                >
-                  <Text style={styles.actionButtonText}>✏️ 编辑</Text>
-                </Pressable>
-                <Pressable
-                  style={[styles.actionButton, styles.deleteButton]}
-                  onPress={() => handleDeleteConfirm(record.id)}
-                >
-                  <Text style={styles.actionButtonText}>🗑️ 删除</Text>
-                </Pressable>
+                <Button baby={baby} label="📊 查看详情" variant="secondary" size="sm" onPress={() => handleShowCalculator(record)} />
+                <Button baby={baby} label="✏️ 编辑" variant="secondary" size="sm" onPress={() => handleEdit(record)} />
+                <Button baby={baby} label="🗑️ 删除" variant="danger" size="sm" onPress={() => handleDeleteConfirm(record.id)} />
               </View>
             </View>
           ))}
@@ -482,7 +483,7 @@ export default function FetalScreen({ baby, onAddFetal, onUpdateFetal, onDeleteF
 
               {/* 计算结果显示 */}
               {calculatedWeight && (
-                <View style={styles.calculationResultBox}>
+                <View style={[styles.calculationResultBox, { borderLeftColor: themeColor }]}>
                   <Text style={styles.calculationTitle}>🎯 胎儿体重估算结果</Text>
                   <View style={styles.resultItem}>
                     <Text style={styles.resultLabel}>估计体重:</Text>
@@ -545,13 +546,13 @@ export default function FetalScreen({ baby, onAddFetal, onUpdateFetal, onDeleteF
     
               </View>
                  <Pressable
-                  style={[styles.formButtonThird, styles.cancelBtn, { backgroundColor: '#D0D0D0' }]}
+                  style={[styles.formButtonThird, styles.cancelBtn, { backgroundColor: theme.colors.surfaceSoft }]}
                   onPress={() => {
                     setShowForm(false);
                     resetForm();
                   }}
                 >
-                  <Text style={styles.formButtonText}>❌ 取消</Text>
+                  <Text style={[styles.formButtonText, { color: theme.colors.text }]}>❌ 取消</Text>
                 </Pressable>
             </ScrollView>
           </View>
@@ -563,13 +564,13 @@ export default function FetalScreen({ baby, onAddFetal, onUpdateFetal, onDeleteF
           <View style={styles.datePickerContainer}>
             <View style={styles.calendarHeader}>
               <Pressable style={styles.calendarNavButton} onPress={() => changeCalendarMonth(-1)}>
-                <Text style={styles.calendarNavText}>‹</Text>
+                <Text style={[styles.calendarNavText, { color: themeColor }]}>‹</Text>
               </Pressable>
               <Text style={styles.calendarTitle}>
                 {calendarMonth.getFullYear()}年{calendarMonth.getMonth() + 1}月
               </Text>
               <Pressable style={styles.calendarNavButton} onPress={() => changeCalendarMonth(1)}>
-                <Text style={styles.calendarNavText}>›</Text>
+                <Text style={[styles.calendarNavText, { color: themeColor }]}>›</Text>
               </Pressable>
             </View>
             <View style={styles.weekDaysRow}>
@@ -743,173 +744,170 @@ export default function FetalScreen({ baby, onAddFetal, onUpdateFetal, onDeleteF
           </View>
         </View>
       </Modal>
-    </ScrollView>
+      </ScrollView>
+    </Screen>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
-    flex: 1,
-    paddingTop:40,
-    backgroundColor: '#F8F4EE',
-    paddingBottom: 20,
+    paddingTop: space.lg,
+    paddingHorizontal: space.lg,
+    paddingBottom: space.xl,
   },
   header: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    paddingHorizontal: 16,
-    paddingTop: 16,
-    paddingBottom: 12,
+    paddingHorizontal: space.lg,
+    paddingTop: space.lg,
+    paddingBottom: space.md,
   },
   title: {
     fontSize: 24,
-    fontWeight: 'bold',
-    color: '#333',
+    fontWeight: fontWeight.bold,
+    color: colors.text,
   },
   addButton: {
-    backgroundColor: '#7D5A50',
-    paddingHorizontal: 14,
-    paddingVertical: 8,
-    borderRadius: 8,
+    backgroundColor: colors.textMuted,
+    paddingHorizontal: space.md,
+    paddingVertical: space.sm,
+    borderRadius: radius.md,
   },
   addButtonText: {
     color: '#fff',
-    fontWeight: 'bold',
-    fontSize: 13,
+    fontWeight: fontWeight.bold,
+    fontSize: fontSize.sm,
   },
   recordsList: {
-    paddingHorizontal: 16,
-    paddingTop: 12,
+    paddingHorizontal: 0,
+    paddingTop: space.md,
   },
   recordCard: {
-    backgroundColor: '#fff',
-    borderRadius: 12,
-    marginBottom: 16,
-    padding: 16,
+    backgroundColor: colors.surface,
+    borderRadius: radius.lg,
+    marginBottom: space.lg,
+    padding: space.lg,
     borderLeftWidth: 4,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.08,
-    shadowRadius: 4,
-    elevation: 3,
+    ...shadow.card,
   },
   recordHeader: {
-    marginBottom: 12,
-    paddingBottom: 8,
+    marginBottom: space.md,
+    paddingBottom: space.sm,
     borderBottomWidth: 1,
-    borderBottomColor: '#eee',
+    borderBottomColor: colors.border,
   },
   recordTitle: {
-    fontSize: 16,
-    fontWeight: '600',
-    color: '#333',
+    fontSize: fontSize.lg,
+    fontWeight: fontWeight.bold,
+    color: colors.text,
   },
   recordContent: {
-    marginBottom: 12,
+    marginBottom: space.md,
   },
   infoRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     paddingVertical: 6,
     borderBottomWidth: 1,
-    borderBottomColor: '#f0f0f0',
+    borderBottomColor: colors.border,
   },
   label: {
-    fontSize: 13,
-    color: '#666',
-    fontWeight: '500',
+    fontSize: fontSize.sm,
+    color: colors.textMuted,
+    fontWeight: fontWeight.medium,
   },
   value: {
-    fontSize: 13,
-    color: '#333',
-    fontWeight: '600',
+    fontSize: fontSize.sm,
+    color: colors.text,
+    fontWeight: fontWeight.bold,
   },
   weightRow: {
     flexDirection: 'column',
     borderTopWidth: 2,
-    borderTopColor: '#E8F1EA',
-    marginTop: 8,
-    paddingTop: 12,
+    borderTopColor: colors.border,
+    marginTop: space.sm,
+    paddingTop: space.md,
     borderBottomWidth: 0,
   },
   weightValue: {
-    fontSize: 20,
-    fontWeight: 'bold',
-    color: '#7D5A50',
+    fontSize: fontSize.xl,
+    fontWeight: fontWeight.bold,
+    color: colors.text,
     marginVertical: 4,
   },
   weightFormula: {
-    fontSize: 11,
-    color: '#999',
+    fontSize: fontSize.xs,
+    color: colors.textSubtle,
     fontStyle: 'italic',
   },
   classificationBadge: {
     alignSelf: 'flex-start',
-    backgroundColor: '#E8F1EA',
-    paddingHorizontal: 10,
-    paddingVertical: 4,
-    borderRadius: 12,
-    marginTop: 8,
+    backgroundColor: colors.surfaceSoft,
+    paddingHorizontal: space.md,
+    paddingVertical: space.xs,
+    borderRadius: radius.pill,
+    marginTop: space.sm,
   },
   classificationText: {
-    fontSize: 12,
-    fontWeight: '600',
-    color: '#3C6B46',
+    fontSize: fontSize.sm,
+    fontWeight: fontWeight.bold,
+    color: colors.textMuted,
   },
   notesRow: {
-    marginTop: 8,
-    paddingTop: 8,
+    marginTop: space.sm,
+    paddingTop: space.sm,
     borderTopWidth: 1,
-    borderTopColor: '#f0f0f0',
+    borderTopColor: colors.border,
   },
   notes: {
-    fontSize: 12,
-    color: '#666',
+    fontSize: fontSize.sm,
+    color: colors.textMuted,
     marginTop: 4,
     lineHeight: 18,
   },
   recordActions: {
     flexDirection: 'row',
-    justifyContent: 'space-between',
-    marginTop: 12,
+    flexWrap: 'wrap',
+    gap: space.sm,
+    marginTop: space.md,
   },
   actionButton: {
     flex: 1,
     paddingVertical: 10,
-    borderRadius: 8,
+    borderRadius: radius.md,
     justifyContent: 'center',
     alignItems: 'center',
-    marginHorizontal: 4,
+    marginHorizontal: space.xs,
   },
   actionButtonText: {
-    fontSize: 12,
-    fontWeight: '600',
-    color: '#333',
+    fontSize: fontSize.sm,
+    fontWeight: fontWeight.bold,
+    color: colors.text,
   },
   calculateButton: {
-    backgroundColor: '#F3F5F2',
+    backgroundColor: colors.surfaceSoft,
   },
   editButton: {
-    backgroundColor: '#F3F5F2',
+    backgroundColor: colors.surfaceSoft,
   },
   deleteButton: {
-    backgroundColor: '#F8E8E8',
+    backgroundColor: colors.surfaceSoft,
   },
   emptyState: {
     alignItems: 'center',
     justifyContent: 'center',
-    paddingVertical: 60,
+    paddingVertical: space.xxl * 2.5,
   },
   emptyText: {
-    fontSize: 18,
-    fontWeight: '600',
-    color: '#999',
-    marginBottom: 8,
+    fontSize: fontSize.xl,
+    fontWeight: fontWeight.bold,
+    color: colors.textSubtle,
+    marginBottom: space.sm,
   },
   emptySubText: {
-    fontSize: 13,
-    color: '#ccc',
+    fontSize: fontSize.sm,
+    color: colors.textSubtle,
   },
   // Modal styles
   modalOverlay: {
@@ -918,38 +916,38 @@ const styles = StyleSheet.create({
     justifyContent: 'flex-end',
   },
   modalContent: {
-    backgroundColor: '#fff',
-    borderTopLeftRadius: 20,
-    borderTopRightRadius: 20,
+    backgroundColor: colors.surface,
+    borderTopLeftRadius: radius.xl,
+    borderTopRightRadius: radius.xl,
     maxHeight: '95%',
-    paddingTop: 20,
+    paddingTop: space.xl,
   },
   formScrollView: {
-    paddingHorizontal: 20,
-    paddingBottom: 20,
+    paddingHorizontal: space.xl,
+    paddingBottom: space.xl,
   },
   formHeader: {
-    marginBottom: 20,
-    paddingBottom: 12,
+    marginBottom: space.xl,
+    paddingBottom: space.md,
     borderBottomWidth: 2,
-    borderBottomColor: '#E8F1EA',
+    borderBottomColor: colors.border,
   },
   formTitle: {
-    fontSize: 20,
-    fontWeight: 'bold',
-    color: '#333',
+    fontSize: fontSize.xl,
+    fontWeight: fontWeight.bold,
+    color: colors.text,
   },
   separator: {
     height: 1,
-    backgroundColor: '#f0f0f0',
-    marginVertical: 16,
+    backgroundColor: colors.border,
+    marginVertical: space.lg,
   },
   sectionTitle: {
-    fontSize: 14,
-    fontWeight: 'bold',
-    color: '#333',
-    marginTop: 16,
-    marginBottom: 12,
+    fontSize: fontSize.md,
+    fontWeight: fontWeight.bold,
+    color: colors.text,
+    marginTop: space.lg,
+    marginBottom: space.md,
   },
   formGroup: {
     marginBottom: 14,
@@ -963,27 +961,27 @@ const styles = StyleSheet.create({
     width: '48%',
   },
   formLabel: {
-    fontSize: 13,
-    fontWeight: '600',
-    color: '#333',
-    marginBottom: 6,
+    fontSize: fontSize.sm,
+    fontWeight: fontWeight.bold,
+    color: colors.text,
+    marginBottom: space.sm,
   },
   requiredMark: {
-    color: '#E63946',
-    fontWeight: '700',
+    color: colors.danger,
+    fontWeight: fontWeight.bold,
   },
   formInput: {
     borderWidth: 1,
-    borderColor: '#E0E0E0',
-    borderRadius: 8,
-    paddingHorizontal: 12,
+    borderColor: colors.border,
+    borderRadius: radius.md,
+    paddingHorizontal: space.lg,
     paddingVertical: 10,
-    fontSize: 14,
-    backgroundColor: '#F9F9F9',
+    fontSize: fontSize.md,
+    backgroundColor: colors.surfaceSoft,
   },
   dateText: {
-    fontSize: 14,
-    color: '#333',
+    fontSize: fontSize.md,
+    color: colors.text,
   },
   formTextArea: {
     minHeight: 80,
@@ -995,44 +993,44 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgba(0,0,0,0.5)',
     justifyContent: 'center',
     alignItems: 'center',
-    padding: 20,
+    padding: space.xl,
   },
   datePickerContainer: {
     width: '100%',
     maxWidth: 360,
-    backgroundColor: '#fff',
-    borderRadius: 16,
-    padding: 16,
+    backgroundColor: colors.surface,
+    borderRadius: radius.xl,
+    padding: space.lg,
   },
   calendarHeader: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: 12,
+    marginBottom: space.md,
   },
   calendarNavButton: {
-    padding: 8,
+    padding: space.sm,
   },
   calendarNavText: {
     fontSize: 22,
-    color: '#7D5A50',
+    color: colors.textMuted,
   },
   calendarTitle: {
-    fontSize: 16,
-    fontWeight: '700',
-    color: '#333',
+    fontSize: fontSize.lg,
+    fontWeight: fontWeight.bold,
+    color: colors.text,
   },
   weekDaysRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    marginBottom: 8,
+    marginBottom: space.sm,
   },
   weekDayText: {
     width: 36,
     textAlign: 'center',
-    fontSize: 12,
-    color: '#666',
-    fontWeight: '700',
+    fontSize: fontSize.sm,
+    color: colors.textMuted,
+    fontWeight: fontWeight.bold,
   },
   calendarGrid: {
     flexDirection: 'row',
@@ -1042,81 +1040,81 @@ const styles = StyleSheet.create({
   dateCell: {
     width: 36,
     height: 36,
-    borderRadius: 8,
+    borderRadius: radius.md,
     justifyContent: 'center',
     alignItems: 'center',
-    marginBottom: 8,
+    marginBottom: space.sm,
   },
   dateCellText: {
-    color: '#333',
-    fontSize: 12,
+    color: colors.text,
+    fontSize: fontSize.sm,
   },
   dateCellSelected: {
-    backgroundColor: '#7D5A50',
+    backgroundColor: colors.textMuted,
   },
   dateCellSelectedText: {
     color: '#fff',
-    fontWeight: '700',
+    fontWeight: fontWeight.bold,
   },
   closeDateBtn: {
-    marginTop: 12,
-    backgroundColor: '#7D5A50',
-    borderRadius: 10,
-    paddingVertical: 12,
+    marginTop: space.md,
+    backgroundColor: colors.textMuted,
+    borderRadius: radius.lg,
+    paddingVertical: space.md,
     alignItems: 'center',
   },
   closeDateBtnText: {
     color: '#fff',
-    fontWeight: '700',
+    fontWeight: fontWeight.bold,
   },
   calculationResultBox: {
-    backgroundColor: '#E8F1EA',
-    borderRadius: 12,
-    padding: 14,
-    marginTop: 16,
-    marginBottom: 16,
+    backgroundColor: colors.surfaceSoft,
+    borderRadius: radius.lg,
+    padding: space.lg,
+    marginTop: space.lg,
+    marginBottom: space.lg,
     borderLeftWidth: 4,
-    borderLeftColor: '#7D5A50',
+    borderLeftColor: colors.textMuted,
   },
   calculationTitle: {
-    fontSize: 14,
-    fontWeight: 'bold',
-    color: '#333',
-    marginBottom: 10,
+    fontSize: fontSize.md,
+    fontWeight: fontWeight.bold,
+    color: colors.text,
+    marginBottom: space.md,
   },
   resultItem: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     paddingVertical: 6,
     borderBottomWidth: 1,
-    borderBottomColor: '#DDE6DE',
+    borderBottomColor: colors.border,
   },
   resultLabel: {
-    fontSize: 12,
-    color: '#666',
+    fontSize: fontSize.sm,
+    color: colors.textMuted,
   },
   resultValue: {
-    fontSize: 12,
-    fontWeight: '600',
-    color: '#333',
+    fontSize: fontSize.sm,
+    fontWeight: fontWeight.bold,
+    color: colors.text,
   },
   classificationHighlight: {
-    color: '#3C6B46',
-    fontWeight: 'bold',
+    color: colors.text,
+    fontWeight: fontWeight.bold,
   },
   referenceBox: {
-    backgroundColor: '#fff',
-    borderRadius: 8,
-    padding: 10,
-    marginTop: 10,
+    backgroundColor: colors.surface,
+    borderRadius: radius.md,
+    padding: space.md,
+    marginTop: space.md,
     borderWidth: 1,
-    borderColor: '#DDE6DE',
+    borderColor: colors.border,
   },
   referenceTitle: {
-    fontSize: 12,
-    fontWeight: 'bold',
-    color: '#333',
-    marginBottom: 8,
+    fontSize: fontSize.sm,
+    fontWeight: fontWeight.bold,
+    color: colors.text,
+    marginBottom: space.sm,
   },
   referenceRow: {
     flexDirection: 'row',
@@ -1124,115 +1122,115 @@ const styles = StyleSheet.create({
     paddingVertical: 4,
   },
   referenceLabel: {
-    fontSize: 11,
-    color: '#666',
+    fontSize: fontSize.xs,
+    color: colors.textMuted,
   },
   referenceValue: {
-    fontSize: 11,
-    fontWeight: '600',
-    color: '#333',
+    fontSize: fontSize.xs,
+    fontWeight: fontWeight.bold,
+    color: colors.text,
   },
   formButtonsRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    marginTop: 20,
+    marginTop: space.xl,
   },
   formButton: {
-    paddingVertical: 12,
-    borderRadius: 8,
+    paddingVertical: space.md,
+    borderRadius: radius.md,
     justifyContent: 'center',
     alignItems: 'center',
-    marginBottom: 10,
+    marginBottom: space.md,
   },
 
   formButtonThird: {
     flex: 1,
-    paddingVertical: 12,
-    borderRadius: 8,
+    paddingVertical: space.md,
+    borderRadius: radius.md,
     justifyContent: 'center',
     alignItems: 'center',
 
   },
   calculateBtn:{
-marginRight:10,
+    marginRight: space.md,
   },
   formButtonText: {
-    fontSize: 14,
-    fontWeight: 'bold',
+    fontSize: fontSize.md,
+    fontWeight: fontWeight.bold,
     color: '#fff',
   },
 
   cancelBtn: {
-    backgroundColor: '#999',
-    marginTop: 10,
+    backgroundColor: colors.textSubtle,
+    marginTop: space.md,
   },
   closeBtn: {
-    backgroundColor: '#7D5A50',
-    marginTop: 20,
+    backgroundColor: colors.textMuted,
+    marginTop: space.xl,
   },
   // Detail view styles
   detailBox: {
-    backgroundColor: '#F9F9F9',
-    borderRadius: 10,
-    padding: 14,
-    marginBottom: 14,
+    backgroundColor: colors.surfaceSoft,
+    borderRadius: radius.lg,
+    padding: space.lg,
+    marginBottom: space.lg,
     borderLeftWidth: 3,
-    borderLeftColor: '#7D5A50',
+    borderLeftColor: colors.textMuted,
   },
   detailRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    paddingVertical: 8,
+    paddingVertical: space.sm,
     borderBottomWidth: 1,
-    borderBottomColor: '#eee',
+    borderBottomColor: colors.border,
   },
   detailLabel: {
-    fontSize: 12,
-    color: '#666',
-    fontWeight: '500',
+    fontSize: fontSize.sm,
+    color: colors.textMuted,
+    fontWeight: fontWeight.medium,
   },
   detailValue: {
-    fontSize: 12,
-    fontWeight: '600',
-    color: '#333',
+    fontSize: fontSize.sm,
+    fontWeight: fontWeight.bold,
+    color: colors.text,
   },
   detailNotes: {
-    fontSize: 13,
-    color: '#555',
+    fontSize: fontSize.sm,
+    color: colors.textMuted,
     lineHeight: 20,
   },
   weightDetailBox: {
-    backgroundColor: '#fff',
-    borderRadius: 10,
-    padding: 16,
-    marginBottom: 12,
+    backgroundColor: colors.surface,
+    borderRadius: radius.lg,
+    padding: space.lg,
+    marginBottom: space.md,
     borderWidth: 2,
-    borderColor: '#7D5A50',
+    borderColor: colors.textMuted,
     justifyContent: 'center',
     alignItems: 'center',
   },
   weightDetailValue: {
     fontSize: 32,
-    fontWeight: 'bold',
-    color: '#7D5A50',
+    fontWeight: fontWeight.bold,
+    color: colors.textMuted,
   },
   weightDetailLabel: {
-    fontSize: 12,
-    color: '#999',
-    marginTop: 4,
+    fontSize: fontSize.sm,
+    color: colors.textSubtle,
+    marginTop: space.xs,
   },
   referenceDetailBox: {
-    backgroundColor: '#fff',
-    borderRadius: 8,
-    padding: 10,
+    backgroundColor: colors.surface,
+    borderRadius: radius.md,
+    padding: space.md,
     borderWidth: 1,
-    borderColor: '#E8F1EA',
+    borderColor: colors.border,
   },
   referenceDetailTitle: {
-    fontSize: 12,
-    fontWeight: 'bold',
-    color: '#333',
-    marginBottom: 8,
+    fontSize: fontSize.sm,
+    fontWeight: fontWeight.bold,
+    color: colors.text,
+    marginBottom: space.sm,
   },
   referenceDetailRow: {
     flexDirection: 'row',
@@ -1240,44 +1238,44 @@ marginRight:10,
     paddingVertical: 5,
   },
   referenceDetailLabel: {
-    fontSize: 11,
-    color: '#666',
+    fontSize: fontSize.xs,
+    color: colors.textMuted,
   },
   referenceDetailValue: {
-    fontSize: 11,
-    fontWeight: '600',
-    color: '#7D5A50',
+    fontSize: fontSize.xs,
+    fontWeight: fontWeight.bold,
+    color: colors.textMuted,
   },
   infoBox: {
-    backgroundColor: '#F3F5F2',
-    borderRadius: 10,
-    padding: 12,
-    marginBottom: 16,
+    backgroundColor: colors.surfaceSoft,
+    borderRadius: radius.lg,
+    padding: space.lg,
+    marginBottom: space.lg,
     borderLeftWidth: 4,
-    borderLeftColor: '#7D5A50',
+    borderLeftColor: colors.textMuted,
   },
   infoTitle: {
-    fontSize: 13,
-    fontWeight: 'bold',
-    color: '#3C6B46',
-    marginBottom: 8,
+    fontSize: fontSize.sm,
+    fontWeight: fontWeight.bold,
+    color: colors.textMuted,
+    marginBottom: space.sm,
   },
   infoText: {
-    fontSize: 12,
-    color: '#4A4A4A',
+    fontSize: fontSize.sm,
+    color: colors.textMuted,
     lineHeight: 18,
   },
   labelWithButton: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: 6,
+    marginBottom: space.sm,
   },
   photoButton: {
-    backgroundColor: '#7D5A50',
-    paddingHorizontal: 12,
-    paddingVertical: 6,
-    borderRadius: 6,
+    backgroundColor: colors.textMuted,
+    paddingHorizontal: space.lg,
+    paddingVertical: space.sm,
+    borderRadius: radius.md,
   },
   photoInputButton: {
     justifyContent: 'center',
@@ -1288,27 +1286,27 @@ marginRight:10,
   },
   photoButtonText: {
     color: '#fff',
-    fontWeight: '600',
-    fontSize: 16,
+    fontWeight: fontWeight.bold,
+    fontSize: fontSize.lg,
   },
   photoRow: {
     flexDirection: 'row',
     alignItems: 'flex-start',
-    gap: 12,
+    gap: space.md,
   },
   photoRowInline: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 8,
+    gap: space.sm,
   },
   imagesContainer: {
     flexDirection: 'column',
-    gap: 10,
-    marginTop: 10,
+    gap: space.md,
+    marginTop: space.md,
   },
   imagesContainerHorizontal: {
     flexDirection: 'row',
-    gap: 8,
+    gap: space.sm,
     flex: 1,
     alignItems: 'flex-start',
   },
@@ -1320,19 +1318,19 @@ marginRight:10,
   imageThumbnail: {
     width: '100%',
     height: 40,
-    borderRadius: 8,
+    borderRadius: radius.md,
   },
   imageThumbnailSmall: {
     width: 40,
     height: 40,
-    borderRadius: 6,
+    borderRadius: radius.md,
   },
   deleteImageButton: {
     position: 'absolute',
     top: -6,
     right: -6,
-    backgroundColor: '#7D5A50',
-    borderRadius: 10,
+    backgroundColor: colors.textMuted,
+    borderRadius: radius.pill,
     width: 20,
     height: 20,
     justifyContent: 'center',
@@ -1340,17 +1338,17 @@ marginRight:10,
   },
   deleteImageButtonText: {
     color: '#fff',
-    fontWeight: 'bold',
+    fontWeight: fontWeight.bold,
     fontSize: 16,
   },
   recordImagesContainer: {
     flexDirection: 'row',
     flexWrap: 'wrap',
-    gap: 8,
-    marginTop: 8,
-    paddingTop: 8,
+    gap: space.sm,
+    marginTop: space.sm,
+    paddingTop: space.sm,
     borderTopWidth: 1,
-    borderTopColor: '#f0f0f0',
+    borderTopColor: colors.border,
   },
   recordImageThumbnail: {
     width: 60,
