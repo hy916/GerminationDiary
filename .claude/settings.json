@@ -19,7 +19,12 @@
       "Bash(find /tmp /Users/huyi -maxdepth 3 -name \"*.png\" -newer /Users/huyi/SproutDiary/assets/splash-icon.png 2>/dev/null | head -10)",
       "Read(//private/tmp/**)",
       "Bash(find /tmp -name \"*.png\" -mmin -10 2>/dev/null; find /var/folders -name \"*.png\" -mmin -10 2>/dev/null | head -10)",
-      "Read(//private/var/folders/**)"
+      "Read(//private/var/folders/**)",
+      "Bash(find /Users/huyi -maxdepth 4 -name \"*.png\" -mmin -30 2>/dev/null | grep -v node_modules | grep -v \".claude\" | head -10)",
+      "Read(//Users/huyi/**)",
+      "Bash(/usr/libexec/PlistBuddy -c \"Print CFBundleDisplayName\" /Users/huyi/SproutDiary/ios/SproutDiary/Info.plist)",
+      "Bash(/usr/libexec/PlistBuddy -c \"Print CFBundleName\" /Users/huyi/SproutDiary/ios/SproutDiary/Info.plist)",
+      "Bash(xcodebuild -workspace SproutDiary.xcworkspace -scheme SproutDiary -configuration Release -sdk iphoneos -destination 'generic/platform=iOS' CODE_SIGNING_ALLOWED=NO CODE_SIGNING_REQUIRED=NO CODE_SIGN_IDENTITY=\"\" -archivePath /Users/huyi/SproutDiary/ios/build/SproutDiary.xcarchive archive)"
     ]
   }
 }
