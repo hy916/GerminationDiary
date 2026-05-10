@@ -23,19 +23,14 @@ import {
   upsertBabyToDb,
 } from './data/db';
 
-const initialBaby = {
-  id: 'baby-1',
-  name: '宝宝',
-  gender: '女',
-  birthday: '2025-12-01',
+const emptyBaby = {
+  id: '',
+  name: '',
+  gender: '',
+  birthday: '',
   avatar: '',
-  createdAt: new Date().toISOString(),
-  birthInfo: {
-    weight: '3200g',
-    length: '50cm',
-    headCircumference: '34cm',
-    delivery: '顺产',
-  },
+  createdAt: '',
+  birthInfo: { weight: '', length: '', headCircumference: '', delivery: '' },
   feedingRecords: [],
   sleepRecords: [],
   diaperRecords: [],
@@ -61,12 +56,13 @@ export default function App() {
 
   const route = stack[stack.length - 1];
   const activeTabKey = stack[0]?.name || 'Home';
-  const showTabBar = true;
+  const hasBaby = babies.length > 0;
+  const showTabBar = hasBaby && tabs.some((t) => t.key === route.name);
 
   const currentBaby = useMemo(() => {
-    if (!babies.length) return initialBaby;
-    return babies.find((item) => item.id === selectedBabyId) || babies[0] || initialBaby;
-  }, [babies, selectedBabyId]);
+    if (!hasBaby) return emptyBaby;
+    return babies.find((item) => item.id === selectedBabyId) || babies[0] || emptyBaby;
+  }, [babies, selectedBabyId, hasBaby]);
 
   useEffect(() => {
     let cancelled = false;
@@ -74,20 +70,12 @@ export default function App() {
       await initDb();
       const loaded = await getBabiesFromDb();
       if (cancelled) return;
-      if (!loaded.length) {
-        await upsertBabyToDb(initialBaby);
-        setBabies([initialBaby]);
-        setSelectedBabyId(initialBaby.id);
-      } else {
-        setBabies(loaded);
-        setSelectedBabyId(loaded[0].id);
-      }
+      setBabies(loaded);
+      if (loaded.length) setSelectedBabyId(loaded[0].id);
       setReady(true);
     })().catch((err) => {
       if (!cancelled) {
         Alert.alert('数据库初始化失败', err?.message || String(err));
-        setBabies([initialBaby]);
-        setSelectedBabyId(initialBaby.id);
         setReady(true);
       }
     });
@@ -154,6 +142,7 @@ export default function App() {
     await upsertBabyToDb(newBaby);
     setBabies((prev) => [...prev, newBaby]);
     setSelectedBabyId(newBaby.id);
+    setStack([{ name: 'Home' }]);
   };
 
   const addRecord = async (module, record) => {
@@ -244,7 +233,8 @@ export default function App() {
   };
 
   const renderScreen = () => {
-    switch (route.name) {
+    const name = !hasBaby ? 'Profile' : route.name;
+    switch (name) {
       case 'Home':
         return <HomeScreen baby={currentBaby} onNavigate={navigate} />;
       case 'Records':
@@ -259,7 +249,7 @@ export default function App() {
             onSwitchBaby={setSelectedBabyId}
             onAddBaby={addBaby}
             onUpdateBaby={updateBaby}
-            onBack={goBack}
+            onBack={hasBaby ? goBack : undefined}
           />
         );
       case 'Feeding':
