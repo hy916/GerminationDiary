@@ -15,7 +15,11 @@
       "Bash(mkdir -p /Users/huyi/SproutDiary/Payload)",
       "Bash(cp -R __TRACKED_VAR__/Products/Applications/SproutDiary.app /Users/huyi/SproutDiary/Payload/)",
       "Bash(zip -qr SproutDiary-2.0.0.ipa Payload)",
-      "Bash(rm -rf Payload)"
+      "Bash(rm -rf Payload)",
+      "Bash(find /tmp /Users/huyi -maxdepth 3 -name \"*.png\" -newer /Users/huyi/SproutDiary/assets/splash-icon.png 2>/dev/null | head -10)",
+      "Read(//private/tmp/**)",
+      "Bash(find /tmp -name \"*.png\" -mmin -10 2>/dev/null; find /var/folders -name \"*.png\" -mmin -10 2>/dev/null | head -10)",
+      "Read(//private/var/folders/**)"
     ]
   }
 }

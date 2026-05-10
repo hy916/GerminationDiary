@@ -1,6 +1,6 @@
 {
   "expo": {
-    "name": "SproutDiary",
+    "name": "萌芽日记",
     "slug": "SproutDiary",
     "version": "2.0.0",
     "orientation": "portrait",
@@ -9,8 +9,8 @@
     "newArchEnabled": true,
     "splash": {
       "image": "./assets/splash-icon.png",
-      "resizeMode": "contain",
-      "backgroundColor": "#ffffff"
+      "resizeMode": "cover",
+      "backgroundColor": "#F8E8E0"
     },
     "ios": {
       "supportsTablet": true,
