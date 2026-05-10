@@ -50,7 +50,7 @@ const initialBaby = {
 const tabs = [
   { key: 'Home', label: '首页', icon: '⌂' },
   { key: 'Records', label: '记录', icon: '≡' },
-  { key: 'Me', label: '我的', icon: '☺' },
+  { key: 'Me', label: '我的', icon: '◯' },
 ];
 
 export default function App() {

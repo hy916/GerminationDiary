@@ -2,10 +2,10 @@
   "expo": {
     "name": "SproutDiary",
     "slug": "SproutDiary",
-    "version": "1.0.0",
+    "version": "2.0.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
-    "userInterfaceStyle": "light",
+    "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
     "splash": {
       "image": "./assets/splash-icon.png",
@@ -13,7 +13,11 @@
       "backgroundColor": "#ffffff"
     },
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": true,
+      "bundleIdentifier": "com.sproutdiary.app",
+      "infoPlist": {
+        "ITSAppUsesNonExemptEncryption": false
+      }
     },
     "android": {
       "adaptiveIcon": {
@@ -31,6 +35,12 @@
         "projectId": "b203cd2c-5437-49e8-aec5-13a0f85b5675"
       }
     },
-    "owner": "hy916"
+    "owner": "hy916",
+    "runtimeVersion": {
+      "policy": "appVersion"
+    },
+    "updates": {
+      "url": "https://u.expo.dev/b203cd2c-5437-49e8-aec5-13a0f85b5675"
+    }
   }
 }

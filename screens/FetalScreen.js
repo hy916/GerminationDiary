@@ -4,11 +4,12 @@ import * as ImagePicker from 'expo-image-picker';
 import { calculateFetalWeight, classifyFetalWeight, getFetalWeightReference } from '../utils/fetalCalculator';
 import Screen from '../ui/components/Screen';
 import Button from '../ui/components/Button';
-import { getTheme } from '../ui/theme';
+import CalendarModal from '../ui/components/CalendarModal';
+import { useAppTheme } from '../ui/theme';
 import { colors, fontSize, fontWeight, radius, shadow, space } from '../ui/tokens';
 
 export default function FetalScreen({ baby, onBack, onAddFetal, onUpdateFetal, onDeleteFetal }) {
-  const theme = getTheme(baby);
+  const theme = useAppTheme(baby);
   const themeColor = theme.colors.accent;
   const [records, setRecords] = useState(baby.fetalRecords || []);
   const [showForm, setShowForm] = useState(false);
@@ -17,7 +18,6 @@ export default function FetalScreen({ baby, onBack, onAddFetal, onUpdateFetal, o
   const [selectedRecord, setSelectedRecord] = useState(null);
   const [previewImage, setPreviewImage] = useState(null);
   const [showDatePicker, setShowDatePicker] = useState(false);
-  const [calendarMonth, setCalendarMonth] = useState(new Date());
 
   const formatLocalDate = (date) => {
     const year = date.getFullYear();
@@ -60,41 +60,6 @@ export default function FetalScreen({ baby, onBack, onAddFetal, onUpdateFetal, o
     });
     setEditingId(null);
     setCalculatedWeight(null);
-    setCalendarMonth(new Date());
-  };
-
-  const selectDate = (value) => {
-    setFormData((prev) => ({ ...prev, date: formatLocalDate(value) }));
-    setCalendarMonth(value);
-    setShowDatePicker(false);
-  };
-
-  const getDaysInMonth = (year, month) => new Date(year, month + 1, 0).getDate();
-
-  const getCalendarDays = () => {
-    const year = calendarMonth.getFullYear();
-    const month = calendarMonth.getMonth();
-    const firstDayIndex = new Date(year, month, 1).getDay();
-    const totalDays = getDaysInMonth(year, month);
-    const days = [];
-
-    for (let i = 0; i < firstDayIndex; i++) {
-      days.push(null);
-    }
-
-    for (let day = 1; day <= totalDays; day++) {
-      days.push(new Date(year, month, day));
-    }
-
-    return days;
-  };
-
-  const changeCalendarMonth = (offset) => {
-    setCalendarMonth((current) => {
-      const year = current.getFullYear();
-      const month = current.getMonth();
-      return new Date(year, month + offset, 1);
-    });
   };
 
   const handleAddNew = () => {
@@ -559,48 +524,16 @@ export default function FetalScreen({ baby, onBack, onAddFetal, onUpdateFetal, o
         </View>
       </Modal>
 
-      <Modal visible={showDatePicker} animationType="fade" transparent={true}>
-        <View style={styles.datePickerOverlay}>
-          <View style={styles.datePickerContainer}>
-            <View style={styles.calendarHeader}>
-              <Pressable style={styles.calendarNavButton} onPress={() => changeCalendarMonth(-1)}>
-                <Text style={[styles.calendarNavText, { color: themeColor }]}>‹</Text>
-              </Pressable>
-              <Text style={styles.calendarTitle}>
-                {calendarMonth.getFullYear()}年{calendarMonth.getMonth() + 1}月
-              </Text>
-              <Pressable style={styles.calendarNavButton} onPress={() => changeCalendarMonth(1)}>
-                <Text style={[styles.calendarNavText, { color: themeColor }]}>›</Text>
-              </Pressable>
-            </View>
-            <View style={styles.weekDaysRow}>
-              {['日','一','二','三','四','五','六'].map((label) => (
-                <Text key={label} style={styles.weekDayText}>{label}</Text>
-              ))}
-            </View>
-            <View style={styles.calendarGrid}>
-              {getCalendarDays().map((date, index) => {
-                const selected = date && formatLocalDate(date) === formData.date;
-                return (
-                  <Pressable
-                    key={`${index}-${date?.toString()}`}
-                    style={[styles.dateCell, selected && { backgroundColor: themeColor }]}
-                    onPress={() => date && selectDate(date)}
-                    disabled={!date}
-                  >
-                    <Text style={[styles.dateCellText, selected && styles.dateCellSelectedText]}>
-                      {date ? date.getDate() : ''}
-                    </Text>
-                  </Pressable>
-                );
-              })}
-            </View>
-            <Pressable style={[styles.closeDateBtn, { backgroundColor: themeColor }]} onPress={() => setShowDatePicker(false)}>
-              <Text style={styles.closeDateBtnText}>取消</Text>
-            </Pressable>
-          </View>
-        </View>
-      </Modal>
+      <CalendarModal
+        baby={baby}
+        visible={showDatePicker}
+        value={formData.date}
+        onClose={() => setShowDatePicker(false)}
+        onSelect={(dateStr) => {
+          setFormData((prev) => ({ ...prev, date: dateStr }));
+          setShowDatePicker(false);
+        }}
+      />
 
       {/* 详情查看Modal */}
       <Modal visible={showCalculator} animationType="slide" transparent={true}>

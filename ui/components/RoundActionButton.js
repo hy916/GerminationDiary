@@ -1,10 +1,10 @@
 import React from 'react';
 import { Pressable, Text, StyleSheet } from 'react-native';
-import { getTheme } from '../theme';
+import { useAppTheme } from '../theme';
 import { sizes, fontSize, fontWeight } from '../tokens';
 
 export default function RoundActionButton({ baby, title, subtitle, onPress, style }) {
-  const theme = getTheme(baby);
+  const theme = useAppTheme(baby);
   return (
     <Pressable
       onPress={onPress}

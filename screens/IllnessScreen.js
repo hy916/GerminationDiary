@@ -6,11 +6,11 @@ import Screen from '../ui/components/Screen';
 import Card from '../ui/components/Card';
 import Button from '../ui/components/Button';
 import ImageStrip from '../ui/components/ImageStrip';
-import { getTheme } from '../ui/theme';
+import { useAppTheme } from '../ui/theme';
 import { fontSize, fontWeight, radius, space } from '../ui/tokens';
 
 export default function IllnessScreen({ baby, onBack, onAddIllness, onUpdateIllness, onDeleteIllness }) {
-  const theme = getTheme(baby);
+  const theme = useAppTheme(baby);
   const [illnessType, setIllnessType] = useState('感冒');
   const [startTime, setStartTime] = useState('');
   const [symptoms, setSymptoms] = useState('');
@@ -116,50 +116,52 @@ export default function IllnessScreen({ baby, onBack, onAddIllness, onUpdateIlln
         <Card baby={baby} style={styles.cardSpacing}>
           <Text style={[styles.sectionTitle, { color: theme.colors.text }]}>新增生病记录</Text>
 
-          <View style={styles.fieldBlock}>
-            <Text style={[styles.fieldLabel, { color: theme.colors.textMuted }]}>症状类型</Text>
-            <TextInput
-              style={[styles.fieldInput, { backgroundColor: theme.colors.surfaceSoft, color: theme.colors.text }]}
-              value={illnessType}
-              onChangeText={setIllnessType}
-              placeholder="如 发烧/咳嗽"
-              placeholderTextColor={theme.colors.placeholder}
-            />
+          <View style={styles.formRow}>
+            <View style={styles.formHalf}>
+              <Text style={[styles.fieldLabel, { color: theme.colors.textMuted }]}>症状类型</Text>
+              <TextInput
+                style={[styles.fieldInput, { backgroundColor: theme.colors.surfaceSoft, color: theme.colors.text }]}
+                value={illnessType}
+                onChangeText={setIllnessType}
+                placeholder="如 发烧/咳嗽"
+                placeholderTextColor={theme.colors.placeholder}
+              />
+            </View>
+            <View style={styles.formHalf}>
+              <Text style={[styles.fieldLabel, { color: theme.colors.textMuted }]}>开始时间</Text>
+              <TextInput
+                style={[styles.fieldInput, { backgroundColor: theme.colors.surfaceSoft, color: theme.colors.text }]}
+                value={startTime}
+                onChangeText={setStartTime}
+                onFocus={handleTimeFocus}
+                placeholder="点击自动填充当前时间"
+                placeholderTextColor={theme.colors.placeholder}
+                editable={true}
+              />
+            </View>
           </View>
 
-          <View style={styles.fieldBlock}>
-            <Text style={[styles.fieldLabel, { color: theme.colors.textMuted }]}>开始时间</Text>
-            <TextInput
-              style={[styles.fieldInput, { backgroundColor: theme.colors.surfaceSoft, color: theme.colors.text }]}
-              value={startTime}
-              onChangeText={setStartTime}
-              onFocus={handleTimeFocus}
-              placeholder="点击自动填充当前时间"
-              placeholderTextColor={theme.colors.placeholder}
-              editable={true}
-            />
-          </View>
-
-          <View style={styles.fieldBlock}>
-            <Text style={[styles.fieldLabel, { color: theme.colors.textMuted }]}>症状</Text>
-            <TextInput
-              style={[styles.fieldInput, { backgroundColor: theme.colors.surfaceSoft, color: theme.colors.text }]}
-              value={symptoms}
-              onChangeText={setSymptoms}
-              placeholder="如 发烧、流鼻涕"
-              placeholderTextColor={theme.colors.placeholder}
-            />
-          </View>
-
-          <View style={styles.fieldBlock}>
-            <Text style={[styles.fieldLabel, { color: theme.colors.textMuted }]}>服药情况</Text>
-            <TextInput
-              style={[styles.fieldInput, { backgroundColor: theme.colors.surfaceSoft, color: theme.colors.text }]}
-              value={medication}
-              onChangeText={setMedication}
-              placeholder="如 退烧药"
-              placeholderTextColor={theme.colors.placeholder}
-            />
+          <View style={styles.formRow}>
+            <View style={styles.formHalf}>
+              <Text style={[styles.fieldLabel, { color: theme.colors.textMuted }]}>症状</Text>
+              <TextInput
+                style={[styles.fieldInput, { backgroundColor: theme.colors.surfaceSoft, color: theme.colors.text }]}
+                value={symptoms}
+                onChangeText={setSymptoms}
+                placeholder="如 发烧、流鼻涕"
+                placeholderTextColor={theme.colors.placeholder}
+              />
+            </View>
+            <View style={styles.formHalf}>
+              <Text style={[styles.fieldLabel, { color: theme.colors.textMuted }]}>服药情况</Text>
+              <TextInput
+                style={[styles.fieldInput, { backgroundColor: theme.colors.surfaceSoft, color: theme.colors.text }]}
+                value={medication}
+                onChangeText={setMedication}
+                placeholder="如 退烧药"
+                placeholderTextColor={theme.colors.placeholder}
+              />
+            </View>
           </View>
 
           <View style={styles.fieldBlock}>
@@ -248,6 +250,14 @@ const styles = StyleSheet.create({
     fontSize: fontSize.xl,
     fontWeight: fontWeight.bold,
     marginBottom: space.md,
+  },
+  formRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginBottom: space.lg,
+  },
+  formHalf: {
+    width: '48%',
   },
   fieldBlock: {
     marginBottom: space.lg,

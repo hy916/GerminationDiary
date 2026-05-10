@@ -1,13 +1,13 @@
 import React from 'react';
 import { View, Text, StyleSheet, Pressable } from 'react-native';
-import { getTheme } from '../theme';
+import { useAppTheme } from '../theme';
 import { sizes, space, fontSize, fontWeight } from '../tokens';
 
 export default function BottomTabBar({ baby, tabs, activeKey, onPressTab }) {
-  const theme = getTheme(baby);
+  const theme = useAppTheme(baby);
 
   return (
-    <View style={[styles.container, { backgroundColor: theme.colors.surface }]}>
+    <View style={[styles.container, { backgroundColor: theme.colors.surface, borderTopColor: theme.colors.border }]}>
       {tabs.map((tab) => {
         const active = activeKey === tab.key;
         return (
@@ -34,7 +34,7 @@ const styles = StyleSheet.create({
     height: sizes.tabBarHeight,
     paddingTop: space.sm,
     borderTopWidth: 1,
-    borderTopColor: 'rgba(0,0,0,0.06)',
+    // borderTopColor set dynamically via theme
   },
   tab: {
     flex: 1,

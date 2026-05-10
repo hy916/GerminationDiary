@@ -1,16 +1,16 @@
 import React, { useEffect, useState } from 'react';
 import { Alert, Image, Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
 import * as ImagePicker from 'expo-image-picker';
-import { formatDateTimeYYYYMMDDHHmm } from '../utils/timeUtils';
+import CalendarModal from '../ui/components/CalendarModal';
 import Screen from '../ui/components/Screen';
 import Card from '../ui/components/Card';
 import Button from '../ui/components/Button';
 import Chip from '../ui/components/Chip';
-import { getTheme } from '../ui/theme';
+import { useAppTheme } from '../ui/theme';
 import { fontSize, fontWeight, radius, space } from '../ui/tokens';
 
 export default function BabyProfileScreen({ baby, babies, onSwitchBaby, onAddBaby, onUpdateBaby, onBack }) {
-  const theme = getTheme(baby);
+  const theme = useAppTheme(baby);
   const [name, setName] = useState(baby.name || '');
   const [gender, setGender] = useState(baby.gender || '女');
   const [birthday, setBirthday] = useState(baby.birthday || '');
@@ -19,6 +19,7 @@ export default function BabyProfileScreen({ baby, babies, onSwitchBaby, onAddBab
   const [delivery, setDelivery] = useState(baby.birthInfo.delivery || '顺产');
   const [newBabyMode, setNewBabyMode] = useState(false);
   const [avatar, setAvatar] = useState(baby.avatar || '');
+  const [showBirthdayPicker, setShowBirthdayPicker] = useState(false);
 
   useEffect(() => {
     setName(baby.name || '');
@@ -75,10 +76,6 @@ export default function BabyProfileScreen({ baby, babies, onSwitchBaby, onAddBab
       { text: '拍照', onPress: takePhoto },
       { text: '取消', style: 'cancel' },
     ]);
-  };
-
-  const fillBirthdayNow = () => {
-    setBirthday(formatDateTimeYYYYMMDDHHmm());
   };
 
   const saveProfile = () => {
@@ -154,70 +151,72 @@ export default function BabyProfileScreen({ baby, babies, onSwitchBaby, onAddBab
             </Pressable>
           </View>
 
-          <View style={styles.fieldBlock}>
-            <Text style={[styles.fieldLabel, { color: theme.colors.textMuted }]}>姓名</Text>
-            <TextInput
-              style={[styles.fieldInput, { backgroundColor: theme.colors.surfaceSoft, color: theme.colors.text }]}
-              value={name}
-              onChangeText={setName}
-              placeholder="宝宝昵称"
-              placeholderTextColor={theme.colors.placeholder}
-            />
-          </View>
-
-          <View style={styles.fieldBlock}>
-            <Text style={[styles.fieldLabel, { color: theme.colors.textMuted }]}>性别</Text>
-            <View style={styles.segmentRow}>
-              {['女', '男'].map((g) => (
-                <Chip key={g} baby={baby} label={g} selected={gender === g} onPress={() => setGender(g)} style={styles.segment} />
-              ))}
+          <View style={styles.formRow}>
+            <View style={styles.formHalf}>
+              <Text style={[styles.fieldLabel, { color: theme.colors.textMuted }]}>姓名</Text>
+              <TextInput
+                style={[styles.fieldInput, { backgroundColor: theme.colors.surfaceSoft, color: theme.colors.text }]}
+                value={name}
+                onChangeText={setName}
+                placeholder="宝宝昵称"
+                placeholderTextColor={theme.colors.placeholder}
+              />
+            </View>
+            <View style={styles.formHalf}>
+              <Text style={[styles.fieldLabel, { color: theme.colors.textMuted }]}>性别</Text>
+              <View style={styles.segmentRow}>
+                {['女', '男'].map((g) => (
+                  <Chip key={g} baby={baby} label={g} selected={gender === g} onPress={() => setGender(g)} style={styles.segment} />
+                ))}
+              </View>
             </View>
           </View>
 
-          <View style={styles.fieldBlock}>
-            <Text style={[styles.fieldLabel, { color: theme.colors.textMuted }]}>出生日期</Text>
-            <TextInput
-              style={[styles.fieldInput, { backgroundColor: theme.colors.surfaceSoft, color: theme.colors.text }]}
-              value={birthday}
-              onChangeText={setBirthday}
-              onFocus={fillBirthdayNow}
-              placeholder="点击自动填充当前日期"
-              placeholderTextColor={theme.colors.placeholder}
-              editable={true}
-            />
+          <View style={styles.formRow}>
+            <View style={styles.formHalf}>
+              <Text style={[styles.fieldLabel, { color: theme.colors.textMuted }]}>出生日期</Text>
+              <Pressable
+                style={[styles.fieldInput, { backgroundColor: theme.colors.surfaceSoft }]}
+                onPress={() => setShowBirthdayPicker(true)}
+              >
+                <Text style={[styles.dateText, { color: birthday ? theme.colors.text : theme.colors.placeholder }]}>
+                  {birthday || '请选择日期'}
+                </Text>
+              </Pressable>
+            </View>
+            <View style={styles.formHalf}>
+              <Text style={[styles.fieldLabel, { color: theme.colors.textMuted }]}>出生体重</Text>
+              <TextInput
+                style={[styles.fieldInput, { backgroundColor: theme.colors.surfaceSoft, color: theme.colors.text }]}
+                value={weight}
+                onChangeText={setWeight}
+                placeholder="如 3200g"
+                placeholderTextColor={theme.colors.placeholder}
+              />
+            </View>
           </View>
 
-          <View style={styles.fieldBlock}>
-            <Text style={[styles.fieldLabel, { color: theme.colors.textMuted }]}>出生体重</Text>
-            <TextInput
-              style={[styles.fieldInput, { backgroundColor: theme.colors.surfaceSoft, color: theme.colors.text }]}
-              value={weight}
-              onChangeText={setWeight}
-              placeholder="如 3200g"
-              placeholderTextColor={theme.colors.placeholder}
-            />
-          </View>
-
-          <View style={styles.fieldBlock}>
-            <Text style={[styles.fieldLabel, { color: theme.colors.textMuted }]}>出生身长</Text>
-            <TextInput
-              style={[styles.fieldInput, { backgroundColor: theme.colors.surfaceSoft, color: theme.colors.text }]}
-              value={length}
-              onChangeText={setLength}
-              placeholder="如 50cm"
-              placeholderTextColor={theme.colors.placeholder}
-            />
-          </View>
-
-          <View style={styles.fieldBlock}>
-            <Text style={[styles.fieldLabel, { color: theme.colors.textMuted }]}>出生方式</Text>
-            <TextInput
-              style={[styles.fieldInput, { backgroundColor: theme.colors.surfaceSoft, color: theme.colors.text }]}
-              value={delivery}
-              onChangeText={setDelivery}
-              placeholder="顺产 / 剖腹产"
-              placeholderTextColor={theme.colors.placeholder}
-            />
+          <View style={styles.formRow}>
+            <View style={styles.formHalf}>
+              <Text style={[styles.fieldLabel, { color: theme.colors.textMuted }]}>出生身长</Text>
+              <TextInput
+                style={[styles.fieldInput, { backgroundColor: theme.colors.surfaceSoft, color: theme.colors.text }]}
+                value={length}
+                onChangeText={setLength}
+                placeholder="如 50cm"
+                placeholderTextColor={theme.colors.placeholder}
+              />
+            </View>
+            <View style={styles.formHalf}>
+              <Text style={[styles.fieldLabel, { color: theme.colors.textMuted }]}>出生方式</Text>
+              <TextInput
+                style={[styles.fieldInput, { backgroundColor: theme.colors.surfaceSoft, color: theme.colors.text }]}
+                value={delivery}
+                onChangeText={setDelivery}
+                placeholder="顺产 / 剖腹产"
+                placeholderTextColor={theme.colors.placeholder}
+              />
+            </View>
           </View>
 
           <Button baby={baby} label="保存档案" onPress={saveProfile} />
@@ -234,76 +233,89 @@ export default function BabyProfileScreen({ baby, babies, onSwitchBaby, onAddBab
           />
           {newBabyMode ? (
             <View>
-              <View style={styles.fieldBlock}>
-                <Text style={[styles.fieldLabel, { color: theme.colors.textMuted }]}>姓名</Text>
-                <TextInput
-                  style={[styles.fieldInput, { backgroundColor: theme.colors.surfaceSoft, color: theme.colors.text }]}
-                  value={name}
-                  onChangeText={setName}
-                  placeholder="宝宝昵称"
-                  placeholderTextColor={theme.colors.placeholder}
-                />
-              </View>
-
-              <View style={styles.fieldBlock}>
-                <Text style={[styles.fieldLabel, { color: theme.colors.textMuted }]}>性别</Text>
-                <View style={styles.segmentRow}>
-                  {['女', '男'].map((g) => (
-                    <Chip key={`new-${g}`} baby={baby} label={g} selected={gender === g} onPress={() => setGender(g)} style={styles.segment} />
-                  ))}
+              <View style={styles.formRow}>
+                <View style={styles.formHalf}>
+                  <Text style={[styles.fieldLabel, { color: theme.colors.textMuted }]}>姓名</Text>
+                  <TextInput
+                    style={[styles.fieldInput, { backgroundColor: theme.colors.surfaceSoft, color: theme.colors.text }]}
+                    value={name}
+                    onChangeText={setName}
+                    placeholder="宝宝昵称"
+                    placeholderTextColor={theme.colors.placeholder}
+                  />
+                </View>
+                <View style={styles.formHalf}>
+                  <Text style={[styles.fieldLabel, { color: theme.colors.textMuted }]}>性别</Text>
+                  <View style={styles.segmentRow}>
+                    {['女', '男'].map((g) => (
+                      <Chip key={`new-${g}`} baby={baby} label={g} selected={gender === g} onPress={() => setGender(g)} style={styles.segment} />
+                    ))}
+                  </View>
                 </View>
               </View>
 
-              <View style={styles.fieldBlock}>
-                <Text style={[styles.fieldLabel, { color: theme.colors.textMuted }]}>出生日期</Text>
-                <TextInput
-                  style={[styles.fieldInput, { backgroundColor: theme.colors.surfaceSoft, color: theme.colors.text }]}
-                  value={birthday}
-                  onChangeText={setBirthday}
-                  onFocus={fillBirthdayNow}
-                  placeholder="点击自动填充当前日期"
-                  placeholderTextColor={theme.colors.placeholder}
-                  editable={true}
-                />
+              <View style={styles.formRow}>
+                <View style={styles.formHalf}>
+                  <Text style={[styles.fieldLabel, { color: theme.colors.textMuted }]}>出生日期</Text>
+                  <Pressable
+                    style={[styles.fieldInput, { backgroundColor: theme.colors.surfaceSoft }]}
+                    onPress={() => setShowBirthdayPicker(true)}
+                  >
+                    <Text style={[styles.dateText, { color: birthday ? theme.colors.text : theme.colors.placeholder }]}>
+                      {birthday || '请选择日期'}
+                    </Text>
+                  </Pressable>
+                </View>
+                <View style={styles.formHalf}>
+                  <Text style={[styles.fieldLabel, { color: theme.colors.textMuted }]}>出生体重</Text>
+                  <TextInput
+                    style={[styles.fieldInput, { backgroundColor: theme.colors.surfaceSoft, color: theme.colors.text }]}
+                    value={weight}
+                    onChangeText={setWeight}
+                    placeholder="如 3200g"
+                    placeholderTextColor={theme.colors.placeholder}
+                  />
+                </View>
               </View>
 
-              <View style={styles.fieldBlock}>
-                <Text style={[styles.fieldLabel, { color: theme.colors.textMuted }]}>出生体重</Text>
-                <TextInput
-                  style={[styles.fieldInput, { backgroundColor: theme.colors.surfaceSoft, color: theme.colors.text }]}
-                  value={weight}
-                  onChangeText={setWeight}
-                  placeholder="如 3200g"
-                  placeholderTextColor={theme.colors.placeholder}
-                />
-              </View>
-
-              <View style={styles.fieldBlock}>
-                <Text style={[styles.fieldLabel, { color: theme.colors.textMuted }]}>出生身长</Text>
-                <TextInput
-                  style={[styles.fieldInput, { backgroundColor: theme.colors.surfaceSoft, color: theme.colors.text }]}
-                  value={length}
-                  onChangeText={setLength}
-                  placeholder="如 50cm"
-                  placeholderTextColor={theme.colors.placeholder}
-                />
-              </View>
-
-              <View style={styles.fieldBlock}>
-                <Text style={[styles.fieldLabel, { color: theme.colors.textMuted }]}>出生方式</Text>
-                <TextInput
-                  style={[styles.fieldInput, { backgroundColor: theme.colors.surfaceSoft, color: theme.colors.text }]}
-                  value={delivery}
-                  onChangeText={setDelivery}
-                  placeholder="顺产 / 剖腹产"
-                  placeholderTextColor={theme.colors.placeholder}
-                />
+              <View style={styles.formRow}>
+                <View style={styles.formHalf}>
+                  <Text style={[styles.fieldLabel, { color: theme.colors.textMuted }]}>出生身长</Text>
+                  <TextInput
+                    style={[styles.fieldInput, { backgroundColor: theme.colors.surfaceSoft, color: theme.colors.text }]}
+                    value={length}
+                    onChangeText={setLength}
+                    placeholder="如 50cm"
+                    placeholderTextColor={theme.colors.placeholder}
+                  />
+                </View>
+                <View style={styles.formHalf}>
+                  <Text style={[styles.fieldLabel, { color: theme.colors.textMuted }]}>出生方式</Text>
+                  <TextInput
+                    style={[styles.fieldInput, { backgroundColor: theme.colors.surfaceSoft, color: theme.colors.text }]}
+                    value={delivery}
+                    onChangeText={setDelivery}
+                    placeholder="顺产 / 剖腹产"
+                    placeholderTextColor={theme.colors.placeholder}
+                  />
+                </View>
               </View>
 
               <Button baby={baby} label="保存新宝宝" onPress={saveNewBaby} />
             </View>
           ) : null}
         </Card>
+
+        <CalendarModal
+          baby={baby}
+          visible={showBirthdayPicker}
+          value={birthday}
+          onClose={() => setShowBirthdayPicker(false)}
+          onSelect={(dateStr) => {
+            setBirthday(dateStr);
+            setShowBirthdayPicker(false);
+          }}
+        />
       </ScrollView>
     </Screen>
   );
@@ -358,6 +370,14 @@ const styles = StyleSheet.create({
     fontSize: fontSize.md,
     fontWeight: fontWeight.bold,
   },
+  formRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginBottom: space.lg,
+  },
+  formHalf: {
+    width: '48%',
+  },
   fieldBlock: {
     marginBottom: space.lg,
   },
@@ -371,6 +391,10 @@ const styles = StyleSheet.create({
     paddingHorizontal: space.lg,
     paddingVertical: 14,
     fontSize: fontSize.md,
+  },
+  dateText: {
+    fontSize: fontSize.md,
+    fontWeight: fontWeight.bold,
   },
   segmentRow: {
     flexDirection: 'row',

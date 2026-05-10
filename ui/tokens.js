@@ -1,4 +1,4 @@
-export const colors = {
+export const lightColors = {
   background: '#F8F4EE',
   surface: '#FFFFFF',
   surfaceMuted: '#F7F2EE',
@@ -11,13 +11,28 @@ export const colors = {
   danger: '#E85A5A',
 };
 
+export const darkColors = {
+  background: '#1A1A1A',
+  surface: '#242424',
+  surfaceMuted: '#2A2A2A',
+  surfaceSoft: '#333333',
+  text: '#E8E0D8',
+  textMuted: '#B0A090',
+  textSubtle: '#887860',
+  placeholder: '#706050',
+  border: 'rgba(255,255,255,0.08)',
+  danger: '#E85A5A',
+};
+
+export const colors = lightColors;
+
 export const space = {
   xs: 4,
-  sm: 8,
-  md: 12,
-  lg: 16,
-  xl: 20,
-  xxl: 24,
+  sm: 6,
+  md: 10,
+  lg: 14,
+  xl: 18,
+  xxl: 22,
 };
 
 export const radius = {
@@ -54,6 +69,6 @@ export const shadow = {
 };
 
 export const sizes = {
-  tabBarHeight: 66,
-  roundAction: 110,
+  tabBarHeight: 62,
+  roundAction: 104,
 };

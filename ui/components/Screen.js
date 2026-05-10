@@ -1,10 +1,10 @@
 import React from 'react';
 import { SafeAreaView, View, Text, StyleSheet, Pressable, Platform, StatusBar } from 'react-native';
-import { getTheme } from '../theme';
+import { useAppTheme } from '../theme';
 import { space, fontSize, fontWeight } from '../tokens';
 
 export default function Screen({ baby, title, onBack, right, children, padded = true }) {
-  const theme = getTheme(baby);
+  const theme = useAppTheme(baby);
 
   return (
     <SafeAreaView style={[styles.safe, { backgroundColor: theme.colors.background }]}>

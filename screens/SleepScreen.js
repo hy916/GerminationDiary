@@ -8,11 +8,11 @@ import Chip from '../ui/components/Chip';
 import Button from '../ui/components/Button';
 import RoundActionButton from '../ui/components/RoundActionButton';
 import ImageStrip from '../ui/components/ImageStrip';
-import { getTheme } from '../ui/theme';
+import { useAppTheme } from '../ui/theme';
 import { space, fontSize, fontWeight, radius } from '../ui/tokens';
 
 export default function SleepScreen({ baby, onBack, onAddSleep, onUpdateSleep, onDeleteSleep, onSetPendingSleepStart }) {
-  const theme = getTheme(baby);
+  const theme = useAppTheme(baby);
   const [sleepType, setSleepType] = useState('夜间睡眠');
   const [startTime, setStartTime] = useState(baby.pendingSleepStart || '');
   const [endTime, setEndTime] = useState('');

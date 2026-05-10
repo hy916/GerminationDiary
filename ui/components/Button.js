@@ -1,10 +1,10 @@
 import React from 'react';
 import { Pressable, Text, StyleSheet } from 'react-native';
-import { getTheme } from '../theme';
+import { useAppTheme } from '../theme';
 import { radius, space, fontSize, fontWeight } from '../tokens';
 
 export default function Button({ baby, label, onPress, variant = 'primary', size = 'lg', style, textStyle, disabled }) {
-  const theme = getTheme(baby);
+  const theme = useAppTheme(baby);
   const containerStyle = getContainerStyle(theme, variant, size, disabled);
   const labelStyle = getLabelStyle(theme, variant, size, disabled);
 

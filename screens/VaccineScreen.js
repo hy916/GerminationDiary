@@ -6,11 +6,11 @@ import Screen from '../ui/components/Screen';
 import Card from '../ui/components/Card';
 import Button from '../ui/components/Button';
 import ImageStrip from '../ui/components/ImageStrip';
-import { getTheme } from '../ui/theme';
+import { useAppTheme } from '../ui/theme';
 import { fontSize, fontWeight, radius, space } from '../ui/tokens';
 
 export default function VaccineScreen({ baby, onBack, onAddVaccine, onUpdateVaccine, onDeleteVaccine }) {
-  const theme = getTheme(baby);
+  const theme = useAppTheme(baby);
   const [vaccineName, setVaccineName] = useState('');
   const [vaccinationDate, setVaccinationDate] = useState('');
   const [location, setLocation] = useState('');
@@ -113,39 +113,43 @@ export default function VaccineScreen({ baby, onBack, onAddVaccine, onUpdateVacc
         <Card baby={baby} style={styles.cardSpacing}>
           <Text style={[styles.sectionTitle, { color: theme.colors.text }]}>新增疫苗记录</Text>
 
-          <View style={styles.fieldBlock}>
-            <Text style={[styles.fieldLabel, { color: theme.colors.textMuted }]}>疫苗名称</Text>
-            <TextInput
-              style={[styles.fieldInput, { backgroundColor: theme.colors.surfaceSoft, color: theme.colors.text }]}
-              value={vaccineName}
-              onChangeText={setVaccineName}
-              placeholder="如 百白破"
-              placeholderTextColor={theme.colors.placeholder}
-            />
+          <View style={styles.formRow}>
+            <View style={styles.formHalf}>
+              <Text style={[styles.fieldLabel, { color: theme.colors.textMuted }]}>疫苗名称</Text>
+              <TextInput
+                style={[styles.fieldInput, { backgroundColor: theme.colors.surfaceSoft, color: theme.colors.text }]}
+                value={vaccineName}
+                onChangeText={setVaccineName}
+                placeholder="如 百白破"
+                placeholderTextColor={theme.colors.placeholder}
+              />
+            </View>
+            <View style={styles.formHalf}>
+              <Text style={[styles.fieldLabel, { color: theme.colors.textMuted }]}>接种时间</Text>
+              <TextInput
+                style={[styles.fieldInput, { backgroundColor: theme.colors.surfaceSoft, color: theme.colors.text }]}
+                value={vaccinationDate}
+                onChangeText={setVaccinationDate}
+                onFocus={handleDateFocus}
+                placeholder="点击自动填充当前时间"
+                placeholderTextColor={theme.colors.placeholder}
+                editable={true}
+              />
+            </View>
           </View>
 
-          <View style={styles.fieldBlock}>
-            <Text style={[styles.fieldLabel, { color: theme.colors.textMuted }]}>接种时间</Text>
-            <TextInput
-              style={[styles.fieldInput, { backgroundColor: theme.colors.surfaceSoft, color: theme.colors.text }]}
-              value={vaccinationDate}
-              onChangeText={setVaccinationDate}
-              onFocus={handleDateFocus}
-              placeholder="点击自动填充当前时间"
-              placeholderTextColor={theme.colors.placeholder}
-              editable={true}
-            />
-          </View>
-
-          <View style={styles.fieldBlock}>
-            <Text style={[styles.fieldLabel, { color: theme.colors.textMuted }]}>接种地点</Text>
-            <TextInput
-              style={[styles.fieldInput, { backgroundColor: theme.colors.surfaceSoft, color: theme.colors.text }]}
-              value={location}
-              onChangeText={setLocation}
-              placeholder="如 儿保站"
-              placeholderTextColor={theme.colors.placeholder}
-            />
+          <View style={styles.formRow}>
+            <View style={styles.formHalf}>
+              <Text style={[styles.fieldLabel, { color: theme.colors.textMuted }]}>接种地点</Text>
+              <TextInput
+                style={[styles.fieldInput, { backgroundColor: theme.colors.surfaceSoft, color: theme.colors.text }]}
+                value={location}
+                onChangeText={setLocation}
+                placeholder="如 儿保站"
+                placeholderTextColor={theme.colors.placeholder}
+              />
+            </View>
+            <View style={styles.formHalf} />
           </View>
 
           <View style={styles.fieldBlock}>
@@ -231,6 +235,14 @@ const styles = StyleSheet.create({
     fontSize: fontSize.xl,
     fontWeight: fontWeight.bold,
     marginBottom: space.md,
+  },
+  formRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginBottom: space.lg,
+  },
+  formHalf: {
+    width: '48%',
   },
   fieldBlock: {
     marginBottom: space.lg,

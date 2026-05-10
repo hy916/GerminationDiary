@@ -6,11 +6,11 @@ import Screen from '../ui/components/Screen';
 import Card from '../ui/components/Card';
 import Button from '../ui/components/Button';
 import ImageStrip from '../ui/components/ImageStrip';
-import { getTheme } from '../ui/theme';
+import { useAppTheme } from '../ui/theme';
 import { fontSize, fontWeight, radius, space } from '../ui/tokens';
 
 export default function GrowthScreen({ baby, onBack, onAddGrowth, onUpdateGrowth, onDeleteGrowth }) {
-  const theme = getTheme(baby);
+  const theme = useAppTheme(baby);
   const [weight, setWeight] = useState('');
   const [length, setLength] = useState('');
   const [startTime, setStartTime] = useState('');
@@ -113,50 +113,52 @@ export default function GrowthScreen({ baby, onBack, onAddGrowth, onUpdateGrowth
         <Card baby={baby} style={styles.cardSpacing}>
           <Text style={[styles.sectionTitle, { color: theme.colors.text }]}>生长发育记录</Text>
 
-          <View style={styles.fieldBlock}>
-            <Text style={[styles.fieldLabel, { color: theme.colors.textMuted }]}>记录时间</Text>
-            <TextInput
-              style={[styles.fieldInput, { backgroundColor: theme.colors.surfaceSoft, color: theme.colors.text }]}
-              value={startTime}
-              onChangeText={setStartTime}
-              onFocus={handleStartTimeFocus}
-              placeholder="点击自动填充当前时间"
-              placeholderTextColor={theme.colors.placeholder}
-              editable={true}
-            />
+          <View style={styles.formRow}>
+            <View style={styles.formHalf}>
+              <Text style={[styles.fieldLabel, { color: theme.colors.textMuted }]}>记录时间</Text>
+              <TextInput
+                style={[styles.fieldInput, { backgroundColor: theme.colors.surfaceSoft, color: theme.colors.text }]}
+                value={startTime}
+                onChangeText={setStartTime}
+                onFocus={handleStartTimeFocus}
+                placeholder="点击自动填充当前时间"
+                placeholderTextColor={theme.colors.placeholder}
+                editable={true}
+              />
+            </View>
+            <View style={styles.formHalf}>
+              <Text style={[styles.fieldLabel, { color: theme.colors.textMuted }]}>体重</Text>
+              <TextInput
+                style={[styles.fieldInput, { backgroundColor: theme.colors.surfaceSoft, color: theme.colors.text }]}
+                value={weight}
+                onChangeText={setWeight}
+                placeholder="如 6.5kg"
+                placeholderTextColor={theme.colors.placeholder}
+              />
+            </View>
           </View>
 
-          <View style={styles.fieldBlock}>
-            <Text style={[styles.fieldLabel, { color: theme.colors.textMuted }]}>体重</Text>
-            <TextInput
-              style={[styles.fieldInput, { backgroundColor: theme.colors.surfaceSoft, color: theme.colors.text }]}
-              value={weight}
-              onChangeText={setWeight}
-              placeholder="如 6.5kg"
-              placeholderTextColor={theme.colors.placeholder}
-            />
-          </View>
-
-          <View style={styles.fieldBlock}>
-            <Text style={[styles.fieldLabel, { color: theme.colors.textMuted }]}>身长</Text>
-            <TextInput
-              style={[styles.fieldInput, { backgroundColor: theme.colors.surfaceSoft, color: theme.colors.text }]}
-              value={length}
-              onChangeText={setLength}
-              placeholder="如 65cm"
-              placeholderTextColor={theme.colors.placeholder}
-            />
-          </View>
-
-          <View style={styles.fieldBlock}>
-            <Text style={[styles.fieldLabel, { color: theme.colors.textMuted }]}>头围</Text>
-            <TextInput
-              style={[styles.fieldInput, { backgroundColor: theme.colors.surfaceSoft, color: theme.colors.text }]}
-              value={headCircumference}
-              onChangeText={setHeadCircumference}
-              placeholder="如 40cm"
-              placeholderTextColor={theme.colors.placeholder}
-            />
+          <View style={styles.formRow}>
+            <View style={styles.formHalf}>
+              <Text style={[styles.fieldLabel, { color: theme.colors.textMuted }]}>身长</Text>
+              <TextInput
+                style={[styles.fieldInput, { backgroundColor: theme.colors.surfaceSoft, color: theme.colors.text }]}
+                value={length}
+                onChangeText={setLength}
+                placeholder="如 65cm"
+                placeholderTextColor={theme.colors.placeholder}
+              />
+            </View>
+            <View style={styles.formHalf}>
+              <Text style={[styles.fieldLabel, { color: theme.colors.textMuted }]}>头围</Text>
+              <TextInput
+                style={[styles.fieldInput, { backgroundColor: theme.colors.surfaceSoft, color: theme.colors.text }]}
+                value={headCircumference}
+                onChangeText={setHeadCircumference}
+                placeholder="如 40cm"
+                placeholderTextColor={theme.colors.placeholder}
+              />
+            </View>
           </View>
 
           <View style={styles.fieldBlock}>
@@ -242,6 +244,14 @@ const styles = StyleSheet.create({
     fontSize: fontSize.xl,
     fontWeight: fontWeight.bold,
     marginBottom: space.md,
+  },
+  formRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginBottom: space.lg,
+  },
+  formHalf: {
+    width: '48%',
   },
   fieldBlock: {
     marginBottom: space.lg,

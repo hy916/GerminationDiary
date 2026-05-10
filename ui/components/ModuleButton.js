@@ -1,10 +1,10 @@
 import React from 'react';
 import { Pressable, Text, StyleSheet, View } from 'react-native';
-import { getTheme } from '../theme';
+import { useAppTheme } from '../theme';
 import { radius, shadow, space, fontSize, fontWeight } from '../tokens';
 
 export default function ModuleButton({ baby, label, onPress, style, fullWidth }) {
-  const theme = getTheme(baby);
+  const theme = useAppTheme(baby);
   return (
     <Pressable
       onPress={onPress}

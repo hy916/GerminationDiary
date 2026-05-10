@@ -2,11 +2,11 @@ import React from 'react';
 import { View, Text, StyleSheet, ScrollView } from 'react-native';
 import Screen from '../ui/components/Screen';
 import ModuleButton from '../ui/components/ModuleButton';
-import { getTheme } from '../ui/theme';
+import { useAppTheme } from '../ui/theme';
 import { space, fontSize, fontWeight } from '../ui/tokens';
 
 export default function RecordsScreen({ baby, onNavigate }) {
-  const theme = getTheme(baby);
+  const theme = useAppTheme(baby);
 
   return (
     <Screen baby={baby} padded={false}>

@@ -1,0 +1,21 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(brew install *)",
+      "Bash(/usr/local/opt/ruby/bin/ruby --version)",
+      "Bash(/usr/local/opt/ruby/bin/gem install *)",
+      "Bash(export PATH=\"/usr/local/opt/ruby/bin:$PATH\")",
+      "Bash(/usr/local/opt/ruby/bin/gem environment *)",
+      "Bash(/usr/local/lib/ruby/gems/4.0.0/bin/pod install *)",
+      "Bash(find /usr/local/etc /etc -name \"cert.pem\" -o -name \"ca-certificates.crt\" 2>/dev/null | head -5)",
+      "Read(//private/etc/**)",
+      "Bash(export SSL_CERT_FILE=/usr/local/etc/ca-certificates/cert.pem)",
+      "Bash(xcodebuild -workspace SproutDiary.xcworkspace -scheme SproutDiary -configuration Release -sdk iphoneos -destination 'generic/platform=iOS' CODE_SIGNING_ALLOWED=NO CODE_SIGNING_REQUIRED=NO CODE_SIGN_IDENTITY=\"\" -archivePath ./build/SproutDiary.xcarchive archive)",
+      "Bash(rm -rf /Users/huyi/SproutDiary/Payload /Users/huyi/SproutDiary/SproutDiary-2.0.0.ipa)",
+      "Bash(mkdir -p /Users/huyi/SproutDiary/Payload)",
+      "Bash(cp -R __TRACKED_VAR__/Products/Applications/SproutDiary.app /Users/huyi/SproutDiary/Payload/)",
+      "Bash(zip -qr SproutDiary-2.0.0.ipa Payload)",
+      "Bash(rm -rf Payload)"
+    ]
+  }
+}

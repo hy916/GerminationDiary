@@ -7,11 +7,11 @@ import Card from '../ui/components/Card';
 import Chip from '../ui/components/Chip';
 import Button from '../ui/components/Button';
 import ImageStrip from '../ui/components/ImageStrip';
-import { getTheme } from '../ui/theme';
+import { useAppTheme } from '../ui/theme';
 import { space, fontSize, fontWeight, radius } from '../ui/tokens';
 
 export default function DiaperScreen({ baby, onBack, onAddDiaper, onUpdateDiaper, onDeleteDiaper }) {
-  const theme = getTheme(baby);
+  const theme = useAppTheme(baby);
   const [diaperType, setDiaperType] = useState('大便');
   const [startTime, setStartTime] = useState('');
   const [color, setColor] = useState('金黄');
@@ -123,28 +123,29 @@ export default function DiaperScreen({ baby, onBack, onAddDiaper, onUpdateDiaper
             ))}
           </View>
 
-          <View style={styles.fieldBlock}>
-            <Text style={[styles.fieldLabel, { color: theme.colors.textMuted }]}>记录时间</Text>
-            <TextInput
-              style={[styles.fieldInput, { backgroundColor: theme.colors.surfaceSoft, color: theme.colors.text }]}
-              value={startTime}
-              onChangeText={setStartTime}
-              onFocus={handleStartTimeFocus}
-              placeholder="点击自动填充当前时间"
-              placeholderTextColor={theme.colors.placeholder}
-              editable={true}
-            />
-          </View>
-
-          <View style={styles.fieldBlock}>
-            <Text style={[styles.fieldLabel, { color: theme.colors.textMuted }]}>颜色</Text>
-            <TextInput
-              style={[styles.fieldInput, { backgroundColor: theme.colors.surfaceSoft, color: theme.colors.text }]}
-              value={color}
-              onChangeText={setColor}
-              placeholder="如 金黄"
-              placeholderTextColor={theme.colors.placeholder}
-            />
+          <View style={styles.formRow}>
+            <View style={styles.formHalf}>
+              <Text style={[styles.fieldLabel, { color: theme.colors.textMuted }]}>记录时间</Text>
+              <TextInput
+                style={[styles.fieldInput, { backgroundColor: theme.colors.surfaceSoft, color: theme.colors.text }]}
+                value={startTime}
+                onChangeText={setStartTime}
+                onFocus={handleStartTimeFocus}
+                placeholder="点击自动填充当前时间"
+                placeholderTextColor={theme.colors.placeholder}
+                editable={true}
+              />
+            </View>
+            <View style={styles.formHalf}>
+              <Text style={[styles.fieldLabel, { color: theme.colors.textMuted }]}>颜色</Text>
+              <TextInput
+                style={[styles.fieldInput, { backgroundColor: theme.colors.surfaceSoft, color: theme.colors.text }]}
+                value={color}
+                onChangeText={setColor}
+                placeholder="如 金黄"
+                placeholderTextColor={theme.colors.placeholder}
+              />
+            </View>
           </View>
 
           <View style={styles.fieldBlock}>
@@ -237,6 +238,14 @@ const styles = StyleSheet.create({
   segment: {
     flex: 1,
     paddingVertical: 12,
+  },
+  formRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginBottom: space.lg,
+  },
+  formHalf: {
+    width: '48%',
   },
   fieldBlock: {
     marginBottom: space.lg,

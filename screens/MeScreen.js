@@ -3,11 +3,11 @@ import { View, Text, StyleSheet, ScrollView, Image } from 'react-native';
 import Screen from '../ui/components/Screen';
 import Card from '../ui/components/Card';
 import Button from '../ui/components/Button';
-import { getTheme } from '../ui/theme';
+import { useAppTheme } from '../ui/theme';
 import { space, fontSize, fontWeight, radius } from '../ui/tokens';
 
 export default function MeScreen({ baby, onNavigate, onClearRecords }) {
-  const theme = getTheme(baby);
+  const theme = useAppTheme(baby);
 
   const ageLabel = useMemo(() => ageText(baby.birthday), [baby.birthday]);
 
@@ -50,7 +50,7 @@ export default function MeScreen({ baby, onNavigate, onClearRecords }) {
 
         <Card baby={baby} style={styles.sectionCard}>
           <Text style={[styles.sectionTitle, { color: theme.colors.text }]}>关于</Text>
-          <Text style={[styles.aboutText, { color: theme.colors.textMuted }]}>版本：1.0.0</Text>
+          <Text style={[styles.aboutText, { color: theme.colors.textMuted }]}>版本：2.0.0</Text>
           <Text style={[styles.aboutText, { color: theme.colors.textMuted }]}>萌芽日记 · 记录宝宝成长点滴</Text>
         </Card>
       </ScrollView>
@@ -112,7 +112,7 @@ const styles = StyleSheet.create({
     gap: space.md,
   },
   secondaryBtn: {
-    backgroundColor: '#EFE7DD',
+    // backgroundColor handled by theme via variant
   },
   sectionCard: {
     marginBottom: space.lg,

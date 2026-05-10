@@ -4,11 +4,12 @@ import { getTodayDateString, getWeekDateRange, getMonthDateRange, countRecordsIn
 import Screen from '../ui/components/Screen';
 import Card from '../ui/components/Card';
 import Chip from '../ui/components/Chip';
-import { getTheme } from '../ui/theme';
+import ImageStrip from '../ui/components/ImageStrip';
+import { useAppTheme } from '../ui/theme';
 import { space, fontSize, fontWeight, radius } from '../ui/tokens';
 
 export default function HomeScreen({ baby, onNavigate }) {
-  const theme = getTheme(baby);
+  const theme = useAppTheme(baby);
   const [viewMode, setViewMode] = useState('today');
   const [selectedImage, setSelectedImage] = useState(null);
   const [filter, setFilter] = useState('all');
@@ -69,7 +70,7 @@ export default function HomeScreen({ baby, onNavigate }) {
       ...withModule(baby.illnessRecords, 'illness', '生病'),
     ]
       .filter((r) => !!r.createdAt)
-      .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+      .sort((a, b) => parseCreatedAt(b.createdAt) - parseCreatedAt(a.createdAt));
 
     return merged.slice(0, 30);
   }, [
@@ -168,10 +169,12 @@ export default function HomeScreen({ baby, onNavigate }) {
                     </Text>
                   ) : null}
                 </View>
-                {record.images?.[0] ? (
-                  <Pressable onPress={() => setSelectedImage(record.images[0])} style={styles.recordThumbWrap}>
-                    <Image source={{ uri: record.images[0] }} style={styles.recordThumb} />
-                  </Pressable>
+                {record.images?.length ? (
+                  <ImageStrip
+                    baby={baby}
+                    images={record.images}
+                    onPressImage={(uri) => setSelectedImage(uri)}
+                  />
                 ) : null}
               </View>
             ))
@@ -189,6 +192,14 @@ export default function HomeScreen({ baby, onNavigate }) {
       </ScrollView>
     </Screen>
   );
+}
+
+function parseCreatedAt(dateStr) {
+  if (!dateStr) return 0;
+  const [datePart, timePart] = dateStr.split(' ');
+  const [year, month, day] = datePart.split('-').map(Number);
+  const [hours, minutes] = (timePart || '00:00').split(':').map(Number);
+  return new Date(year, month - 1, day, hours, minutes).getTime();
 }
 
 function withModule(records, module, moduleLabel) {
@@ -223,7 +234,7 @@ function formatRecordSummary(record) {
 }
 
 function SummaryItem({ baby, label, value }) {
-  const theme = getTheme(baby);
+  const theme = useAppTheme(baby);
   return (
     <View style={styles.summaryItem}>
       <Text style={[styles.summaryNumber, { color: theme.colors.accent }]}>{value}</Text>
@@ -233,7 +244,7 @@ function SummaryItem({ baby, label, value }) {
 }
 
 function QuickEntry({ baby, label, onPress }) {
-  const theme = getTheme(baby);
+  const theme = useAppTheme(baby);
   return (
     <Pressable onPress={onPress} style={[styles.quickButton, { backgroundColor: theme.colors.surface }]}>
       <Text style={[styles.quickText, { color: theme.colors.text }]}>{label}</Text>
@@ -346,7 +357,7 @@ const styles = StyleSheet.create({
   recordItem: {
     borderRadius: radius.lg,
     padding: space.lg,
-    flexDirection: 'row',
+    flexDirection: 'column',
     marginBottom: space.md,
   },
   recordMain: {
@@ -371,16 +382,6 @@ const styles = StyleSheet.create({
   recordNote: {
     fontSize: fontSize.md,
     fontWeight: fontWeight.medium,
-  },
-  recordThumbWrap: {
-    width: 86,
-    height: 86,
-    borderRadius: radius.lg,
-    overflow: 'hidden',
-  },
-  recordThumb: {
-    width: '100%',
-    height: '100%',
   },
   modalOverlay: {
     flex: 1,

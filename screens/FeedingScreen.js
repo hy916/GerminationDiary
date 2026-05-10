@@ -8,11 +8,11 @@ import Chip from '../ui/components/Chip';
 import Button from '../ui/components/Button';
 import RoundActionButton from '../ui/components/RoundActionButton';
 import ImageStrip from '../ui/components/ImageStrip';
-import { getTheme } from '../ui/theme';
+import { useAppTheme } from '../ui/theme';
 import { space, fontSize, fontWeight, radius } from '../ui/tokens';
 
 export default function FeedingScreen({ baby, onBack, onAddFeeding, onUpdateFeeding, onDeleteFeeding, onSetPendingFeedingStart }) {
-  const theme = getTheme(baby);
+  const theme = useAppTheme(baby);
   const [feedingType, setFeedingType] = useState('母乳');
   const [startTime, setStartTime] = useState(baby.pendingFeedingStart || '');
   const [endTime, setEndTime] = useState('');

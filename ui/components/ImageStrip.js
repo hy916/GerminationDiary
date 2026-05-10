@@ -1,10 +1,10 @@
 import React from 'react';
 import { View, Image, Pressable, Text, StyleSheet } from 'react-native';
-import { getTheme } from '../theme';
+import { useAppTheme } from '../theme';
 import { radius, space, fontSize, fontWeight } from '../tokens';
 
 export default function ImageStrip({ baby, images, onPressImage, onRemoveImage, style }) {
-  const theme = getTheme(baby);
+  const theme = useAppTheme(baby);
   if (!images?.length) return null;
 
   return (
@@ -35,6 +35,7 @@ const styles = StyleSheet.create({
     flexWrap: 'wrap',
     gap: space.sm,
     marginTop: space.sm,
+    marginBottom: space.md,
   },
   item: {
     width: 72,
@@ -67,4 +68,3 @@ const styles = StyleSheet.create({
     lineHeight: 16,
   },
 });
-
