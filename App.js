@@ -238,6 +238,30 @@ export default function App() {
     ]);
   };
 
+  const encodeImages = async (records) => {
+    const result = [];
+    for (const record of records) {
+      const encoded = { ...record };
+      if (Array.isArray(record.images) && record.images.length > 0) {
+        const encodedImages = [];
+        for (const img of record.images) {
+          try {
+            const base64 = await FileSystem.readAsStringAsync(img, {
+              encoding: FileSystem.EncodingType.Base64,
+            });
+            const ext = img.split('.').pop()?.split('?')[0] || 'jpg';
+            encodedImages.push({ uri: img, data: base64, ext });
+          } catch {
+            encodedImages.push({ uri: img, data: null, ext: 'jpg' });
+          }
+        }
+        encoded.images = encodedImages;
+      }
+      result.push(encoded);
+    }
+    return result;
+  };
+
   const handleExport = async (selectedCategories) => {
     try {
       const allData = await exportAllData();
@@ -267,7 +291,7 @@ export default function App() {
         return cat ? selectedCategories[cat] : true;
       });
 
-      exportObj.records[babyId] = filtered;
+      exportObj.records[babyId] = await encodeImages(filtered);
 
       const jsonStr = JSON.stringify(exportObj, null, 2);
       const fileName = `SproutDiary_backup_${new Date().toISOString().slice(0, 10)}.json`;
@@ -288,6 +312,39 @@ export default function App() {
     } catch (err) {
       Alert.alert('导出失败', err?.message || String(err));
     }
+  };
+
+  const decodeImages = async (recordsMap) => {
+    const result = {};
+    for (const babyId of Object.keys(recordsMap)) {
+      const decoded = [];
+      for (const record of recordsMap[babyId]) {
+        const fixed = { ...record };
+        if (Array.isArray(record.images) && record.images.length > 0) {
+          const restoredImages = [];
+          for (const img of record.images) {
+            if (img && typeof img === 'object' && img.data) {
+              try {
+                const fileName = `img_${Date.now()}_${Math.random().toString(36).slice(2, 8)}.${img.ext || 'jpg'}`;
+                const filePath = `${FileSystem.documentDirectory}${fileName}`;
+                await FileSystem.writeAsStringAsync(filePath, img.data, {
+                  encoding: FileSystem.EncodingType.Base64,
+                });
+                restoredImages.push(filePath);
+              } catch {
+                restoredImages.push(img.uri || '');
+              }
+            } else if (typeof img === 'string') {
+              restoredImages.push(img);
+            }
+          }
+          fixed.images = restoredImages;
+        }
+        decoded.push(fixed);
+      }
+      result[babyId] = decoded;
+    }
+    return result;
   };
 
   const handleImport = async () => {
@@ -328,13 +385,14 @@ export default function App() {
           {
             text: '确定导入',
             onPress: async () => {
+              data.records = await decodeImages(data.records);
               await importAllData(data);
               const loaded = await getBabiesFromDb();
               setBabies(loaded);
               if (loaded.length && !loaded.some((b) => b.id === selectedBabyId)) {
                 setSelectedBabyId(loaded[0].id);
               }
-              Alert.alert('导入成功', '数据已成功恢复，请重启应用以确保数据完全加载。');
+              Alert.alert('导入成功', '数据已成功恢复。');
             },
           },
         ],

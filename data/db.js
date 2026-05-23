@@ -70,12 +70,8 @@ function executeLegacy(handle, sql, params) {
 
 export async function initDb() {
   if (Platform.OS === 'web') {
-    window.localStorage.removeItem(STORAGE_KEYS.babies);
-    window.localStorage.removeItem(STORAGE_KEYS.records);
     return;
   }
-  await execute('DROP TABLE IF EXISTS records;');
-  await execute('DROP TABLE IF EXISTS babies;');
   await execute(
     `CREATE TABLE IF NOT EXISTS babies (
       id TEXT PRIMARY KEY NOT NULL,
