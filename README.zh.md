@@ -74,3 +74,85 @@ title: 萌芽日记
 keywords: 萌芽日记
 description: 萌芽日记APP用途在于新手父母在宝宝出生后，需记录大量基础信息、喂养细节、日常状态及生长发育情况，当前多通过纸质笔记、备忘录等方式记录，存在信息零散、查找不便、统计困难、无法直观追踪成长趋势等问题。
 -->
+
+
+#iOS
+## 重新编译
+cd ios && xcodebuild build \
+  -workspace app.xcworkspace \
+  -scheme app \
+  -configuration Release \
+  -sdk iphoneos \
+  -destination 'generic/platform=iOS' \
+  CODE_SIGNING_ALLOWED=NO
+
+## 重新打包
+cd /tmp && rm -rf Payload && mkdir Payload && \
+cp -R ~/Library/Developer/Xcode/DerivedData/app-*/Build/Products/Release-iphoneos/app.app Payload/ && \
+zip -r9 GameHub.ipa Payload/ >/dev/null && \
+mv GameHub.ipa ~/GameHub/
+```
+
+# 快捷变更版本号
+
+## 统一用脚本自动改版本
+
+```txt
+发版前：
+自动同时修改：
+
+app.json
+ios/app/Info.plist
+```
+
+---
+
+# 做一个 release.sh
+
+例如：
+
+```bash
+#!/bin/bash
+
+VERSION=$1
+BUILD=$2
+
+echo "Updating to version $VERSION ($BUILD)"
+
+# app.json
+sed -i '' "s/\"version\": \".*\"/\"version\": \"$VERSION\"/" app.json
+sed -i '' "s/\"versionCode\": [0-9]*/\"versionCode\": $BUILD/" app.json
+sed -i '' "s/\"buildNumber\": \".*\"/\"buildNumber\": \"$BUILD\"/" app.json
+
+# iOS plist
+/usr/libexec/PlistBuddy -c "Set :CFBundleShortVersionString $VERSION" ios/app/Info.plist
+/usr/libexec/PlistBuddy -c "Set :CFBundleVersion $BUILD" ios/app/Info.plist
+
+echo "Done."
+```
+
+---
+
+# 使用方式
+
+```bash
+./release.sh 2.0.0 12
+```
+
+自动：
+
+## Android
+
+```txt
+version: 2.0.0
+versionCode: 12
+```
+
+## iOS
+
+```txt
+CFBundleShortVersionString: 2.0.0
+CFBundleVersion: 12
+```
+
+---
