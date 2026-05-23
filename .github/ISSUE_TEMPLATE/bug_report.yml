@@ -1,43 +1,46 @@
 name: 🙋‍♂️ [SproutDiary] - Support & Feedback
-description: Get help with SproutDiary, report bugs, or request features.
+description: "Get help with SproutDiary, report bugs or request new features."
 title: '🙋‍♂️ Support & Feedback: SproutDiary'
 labels: ['support', 'feedback', 'question']
 assignees:
   - jaywcjlove
+
 body:
   - type: markdown
     attributes:
       value: |
-        <img align="right" height="86" alt="SproutDiary" src="https://github.com/user-attachments/assets/965f303e-1c75-4a08-afc1-565ed5b9c06b"> Please provide as much detail as possible about your support request or feedback.
-        
-        SproutDiary is a professional macOS application designed specifically for image screenshot capture, annotation, and drawing board creation. It provides a focused editing canvas that integrates multiple powerful features, including drawing tools, blur/mosaic, spotlight, QR code overlay, watermark, and image layer pasting. In addition to robust editing capabilities, SproutDiary supports editing existing images, a free creative drawing board mode, and a precise screenshot mode, helping users efficiently complete image processing tasks.
+        <img align="right" height="100" alt="SproutDiary" src="https://github.com/user-attachments/assets/965f303e-1c75-4a08-afc1-565ed5b9c06b" />
+        Please provide your support request or feedback in detail.
+
+        SproutDiary is designed for new parents to record babies' daily information, feeding details, physical status and growth data. Traditional paper notes and memo apps cause scattered records, inconvenient search, difficult statistics and unclear growth tracking.
+        This app integrates all recording demands from birth to growth period. It helps parents systematically keep precious growth memories, provides accurate historical data for physical examinations and medical visits, and eases daily recording burden.
 
         ### Contact Information
 
-        If you encounter any issues or need support while using our app, please feel free to contact us through the following methods:
+        Feel free to reach out if you encounter any issues or need assistance:
 
-        - **Email Support**: [kennyiseeyou@gmail.com](mailto:kennyiseeyou@gmail.com)
-        - **Social Media**: [Twitter](https://twitter.com/jaywcjlove)
+        - **Email Support**: [hy963132341@gmail.com](mailto:hy963132341@gmail.com)
+        - **Social Media**: [Twitter](https://twitter.com/hx_yii)
 
-        We will respond to your message as soon as possible. Thank you for your support of our app!
+        We will reply to you as soon as possible. Thank you for your support!
 
   - type: textarea
     attributes:
-      label: 🙋‍♂️ How can we help you?
-      description: Describe the issue you're facing or the feature you'd like to request.
-      placeholder: For example, I'm experiencing an issue with...
+      label: 🙋‍♂️ What help do you need?
+      description: Describe your encountered problem or feature request.
+      placeholder: For example, I found an issue...
     validations:
       required: true
 
   - type: dropdown
     id: os_version
     attributes:
-      label: "💻 Desktop"
-      description: Your operating system and version.
+      label: "📱 Device System"
+      description: Your device system and version.
       options:
-        - macOS 26.x (Tahoe)
-        - macOS 15.x (Sequoia)
-        - macOS 14.x (Sonoma)
+        - iPhone
+        - Android
+        - Web
       default: 0
     validations:
       required: true
@@ -45,18 +48,16 @@ body:
   - type: markdown
     attributes:
       value: |
-        **How can I send you a crash report for one of your apps?**
+        **How to submit app crash reports?**
 
-        - macOS Open Finder
-        - Select Go to **Folder…** from the Go menu <kbd>⇧</kbd> + <kbd>⌘</kbd> + <kbd>G</kbd>
-        - Enter: **~/Library/Logs/DiagnosticReports**
-        - In the resulting list, select all files that starts with the app name, ZIP them, and send me
+        - Capture screenshots or record bug videos
+        - Compress files into a ZIP package
         - Attach the file to this issue
 
   - type: textarea
     attributes:
-      label: ℹ️ Additional context
-      description: Add any additional information that could be helpful.
-      placeholder: ex. Screenshots, steps to reproduce, etc.
+      label: ℹ️ Additional Information
+      description: Add extra details about your problem.
+      placeholder: Such as screenshots, reproduction steps, etc.
     validations:
       required: false

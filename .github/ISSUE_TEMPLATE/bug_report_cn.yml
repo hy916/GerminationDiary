@@ -11,14 +11,14 @@ body:
       value: |
         <img align="right" height="100" alt="SproutDiary" src="https://github.com/user-attachments/assets/965f303e-1c75-4a08-afc1-565ed5b9c06b" /> 请尽可能详细地提供您的支持请求或反馈。
 
-        SproutDiary 是一款专为 macOS 用户设计的图像截图、标注与画板应用。它提供一个专注的编辑画布，集成了多种强大功能，包括绘图工具、模糊/马赛克、聚光灯、二维码叠加、水印以及图片图层粘贴等。除了强大的编辑功能外，SproutDiary 还支持编辑现有图像、自由创作的画板模式以及精准的屏幕截图模式，帮助用户高效完成图像处理任务。
-        
+        SproutDiary 萌芽日记APP用途在于新手父母在宝宝出生后，需记录大量基础信息、喂养细节、日常状态及生长发育情况，当前多通过纸质笔记、备忘录等方式记录，存在信息零散、查找不便、统计困难、无法直观追踪成长趋势等问题。本APP旨在整合宝宝出生至成长各阶段的核心记录需求，提供便捷、全面、直观的记录工具，帮助父母系统化留存宝宝成长痕迹，同时为宝宝体检、就医提供精准的历史数据支撑，减轻育儿记录负担。
+
         ### 联系信息
 
         如果您在使用我们的应用时遇到任何问题或需要支持，请随时通过以下方式与我们联系：
 
-        - **电子邮件支持**: [kennyiseeyou@gmail.com](mailto:kennyiseeyou@gmail.com)
-        - **社交媒体**: [Twitter](https://twitter.com/jaywcjlove)
+        - **电子邮件支持**: [hy963132341@gmail.com](mailto:hy963132341@gmail.com)
+        - **社交媒体**: [Twitter](https://twitter.com/hx_yii)
 
         我们会尽快回复您的消息，感谢您对我们应用的支持！
 
@@ -34,12 +34,12 @@ body:
   - type: dropdown
     id: os_version
     attributes:
-      label: "💻 桌面"
-      description: 您的操作系统和版本。
+      label: "📱 手机"
+      description: 您的系统和版本。
       options:
-        - macOS 26.x (Tahoe)
-        - macOS 15.x (Sequoia)
-        - macOS 14.x (Sonoma)
+        - iPhone
+        - android
+        - web
       default: 0
     validations:
       required: true
@@ -49,10 +49,8 @@ body:
       value: |
         **如何向我发送应用程序的崩溃报告？**
 
-        - 在 macOS 上打开 Finder
-        - 从“前往”菜单中选择 **前往文件夹…** <kbd>⇧</kbd> + <kbd>⌘</kbd> + <kbd>G</kbd>
-        - 输入：**~/Library/Logs/DiagnosticReports**
-        - 在出现的列表中，选择所有以应用程序名称开头的文件，将它们压缩成 ZIP 文件并发送给我
+        - 截图或者录屏bug
+        - 将它们压缩成 ZIP 文件并发送给我
         - 将文件附加到此问题中
 
   - type: textarea

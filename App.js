@@ -1,6 +1,6 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { StyleSheet, View, ActivityIndicator, Alert, Platform } from 'react-native';
-import * as FileSystem from 'expo-file-system';
+import * as FileSystem from 'expo-file-system/legacy';
 import * as Sharing from 'expo-sharing';
 import * as DocumentPicker from 'expo-document-picker';
 import HomeScreen from './screens/HomeScreen';
@@ -273,9 +273,7 @@ export default function App() {
       const fileName = `SproutDiary_backup_${new Date().toISOString().slice(0, 10)}.json`;
       const filePath = `${FileSystem.documentDirectory}${fileName}`;
 
-      await FileSystem.writeAsStringAsync(filePath, jsonStr, {
-        encoding: FileSystem.EncodingType.UTF8,
-      });
+      await FileSystem.writeAsStringAsync(filePath, jsonStr);
 
       const isAvailable = await Sharing.isAvailableAsync();
       if (isAvailable) {
@@ -312,9 +310,7 @@ export default function App() {
         const response = await fetch(file.uri);
         jsonStr = await response.text();
       } else {
-        jsonStr = await FileSystem.readAsStringAsync(file.uri, {
-          encoding: FileSystem.EncodingType.UTF8,
-        });
+        jsonStr = await FileSystem.readAsStringAsync(file.uri);
       }
 
       const data = JSON.parse(jsonStr);

@@ -1,5 +1,13 @@
 import React, { useRef, useState } from 'react';
-import { View, Text, StyleSheet, Pressable, ScrollView, KeyboardAvoidingView, Platform } from 'react-native';
+import {
+  View,
+  Text,
+  StyleSheet,
+  Pressable,
+  ScrollView,
+  KeyboardAvoidingView,
+  Platform,
+} from 'react-native';
 import { useAppTheme } from '../theme';
 import { space, fontSize, fontWeight, radius } from '../tokens';
 
@@ -17,51 +25,58 @@ export default function RecordTabsLayout({
 
   const switchTab = (tab) => {
     setActiveTab(tab);
-    pagerRef.current?.scrollTo({ x: tab === 'add' ? 0 : width, animated: true });
+    pagerRef.current?.scrollTo({
+      x: tab === 'add' ? 0 : width,
+      animated: true,
+    });
   };
 
   return (
     <KeyboardAvoidingView
       style={styles.root}
-      behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
       keyboardVerticalOffset={Platform.OS === 'ios' ? 90 : 0}
-      onLayout={(e) => setWidth(e.nativeEvent.layout.width)}
     >
-      <View style={[styles.tabBar, { backgroundColor: theme.colors.surfaceMuted }]}>
-        <Tab baby={baby} active={activeTab === 'add'} label={addTitle} onPress={() => switchTab('add')} />
-        <Tab baby={baby} active={activeTab === 'history'} label={historyTitle} onPress={() => switchTab('history')} />
-      </View>
+      <View style={styles.root} onLayout={(e) => setWidth(e.nativeEvent.layout.width)}>
+        <View style={[styles.tabBar, { backgroundColor: theme.colors.surfaceMuted }]}>
+          <Tab baby={baby} active={activeTab === 'add'} label={addTitle} onPress={() => switchTab('add')} />
+          <Tab baby={baby} active={activeTab === 'history'} label={historyTitle} onPress={() => switchTab('history')} />
+        </View>
 
-      {width > 0 ? (
-        <ScrollView
-          ref={pagerRef}
-          horizontal
-          pagingEnabled
-          showsHorizontalScrollIndicator={false}
-          keyboardShouldPersistTaps="handled"
-          onMomentumScrollEnd={(e) => {
-            const index = Math.round(e.nativeEvent.contentOffset.x / width);
-            setActiveTab(index === 0 ? 'add' : 'history');
-          }}
-        >
+        {width > 0 ? (
           <ScrollView
-            style={{ width }}
-            showsVerticalScrollIndicator={false}
-            contentContainerStyle={styles.pageContent}
+            ref={pagerRef}
+            horizontal
+            pagingEnabled
+            showsHorizontalScrollIndicator={false}
             keyboardShouldPersistTaps="handled"
+            onMomentumScrollEnd={(e) => {
+              const index = Math.round(e.nativeEvent.contentOffset.x / width);
+              setActiveTab(index === 0 ? 'add' : 'history');
+            }}
           >
-            {renderAdd({ switchTab })}
-          </ScrollView>
+            <ScrollView
+              style={{ width }}
+              showsVerticalScrollIndicator={false}
+              keyboardShouldPersistTaps="handled"
+              keyboardDismissMode="interactive"
+              contentContainerStyle={styles.pageContent}
+            >
+              {renderAdd({ switchTab })}
+            </ScrollView>
 
-          <ScrollView
-            style={{ width }}
-            showsVerticalScrollIndicator={false}
-            contentContainerStyle={styles.pageContent}
-          >
-            {renderHistory({ switchTab })}
+            <ScrollView
+              style={{ width }}
+              showsVerticalScrollIndicator={false}
+              keyboardShouldPersistTaps="handled"
+              keyboardDismissMode="interactive"
+              contentContainerStyle={styles.pageContent}
+            >
+              {renderHistory({ switchTab })}
+            </ScrollView>
           </ScrollView>
-        </ScrollView>
-      ) : null}
+        ) : null}
+      </View>
     </KeyboardAvoidingView>
   );
 }
@@ -91,14 +106,9 @@ const styles = StyleSheet.create({
     marginBottom: space.md,
     alignItems: 'center',
   },
-  title: {
-    fontSize: 30,
-    fontWeight: fontWeight.bold,
-    letterSpacing: -0.5,
-  },
   tabBar: {
     flexDirection: 'row',
-    marginHorizontal: space.lg,
+    marginHorizontal: space.sm,
     marginBottom: space.lg,
     padding: 4,
     borderRadius: radius.pill,
@@ -114,7 +124,7 @@ const styles = StyleSheet.create({
     fontWeight: fontWeight.bold,
   },
   pageContent: {
-  paddingHorizontal: 1,
-  paddingBottom: space.xxl,
+    paddingHorizontal: space.sm,
+    paddingBottom: 120,
   },
 });

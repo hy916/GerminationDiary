@@ -1,5 +1,5 @@
 import React, { useMemo } from 'react';
-import { View, Text, StyleSheet, ScrollView, Image, Pressable } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, Image, Pressable,Linking } from 'react-native';
 import Screen from '../ui/components/Screen';
 import Card from '../ui/components/Card';
 import Button from '../ui/components/Button';
@@ -46,7 +46,7 @@ export default function MeScreen({ baby, onNavigate, onClearRecords }) {
           <MenuItem
             baby={baby}
             icon="🧸"
-            title="编辑宝宝档案"
+            title="编辑档案"
             desc="头像、生日、出生信息"
             onPress={() => onNavigate('Profile')}
           />
@@ -60,41 +60,25 @@ export default function MeScreen({ baby, onNavigate, onClearRecords }) {
           <MenuItem
             baby={baby}
             icon="💾"
-            title="数据导入导出"
+            title="数据管理"
             desc="导出备份或从备份恢复数据"
             onPress={() => onNavigate('DataBackup')}
           />
+            <MenuItem
+            baby={baby}
+            icon="🗂️"
+            title="清空数据"
+            desc="清空当前宝宝的所有记录，档案信息会保留"
+            onPress={() => onClearRecords()}
+          />
+            <MenuItem
+            baby={baby}
+            icon="👨"
+            title="联系作者"
+            desc="《萌芽日记》用简单、温柔的方式，记录宝宝成长中的每一个小瞬间。"
+            onPress={() => Linking.openURL('https://github.com/hy916/GerminationDiary')}
+          />
         </View>
-
-        <Card baby={baby} style={styles.sectionCard}>
-          <View style={styles.sectionHeader}>
-            <View style={[styles.sectionIconWrap, { backgroundColor: theme.colors.surfaceMuted }]}>
-              <Text style={styles.sectionIcon}>🗂️</Text>
-            </View>
-            <View style={styles.sectionCopy}>
-              <Text style={[styles.sectionTitle, { color: theme.colors.text }]}>数据管理</Text>
-              <Text style={[styles.sectionDesc, { color: theme.colors.textMuted }]}>
-                清空当前宝宝的所有记录，档案信息会保留
-              </Text>
-            </View>
-          </View>
-
-          <Button baby={baby} label="清空记录" variant="danger" onPress={onClearRecords} style={styles.dangerBtn} />
-        </Card>
-
-        <Card baby={baby} style={styles.sectionCard}>
-          <View style={styles.aboutHeader}>
-            <Text style={styles.aboutIcon}>🌱</Text>
-            <View>
-              <Text style={[styles.sectionTitle, { color: theme.colors.text }]}>萌芽日记</Text>
-              <Text style={[styles.aboutText, { color: theme.colors.textMuted }]}>版本 2.0.0</Text>
-            </View>
-          </View>
-
-          <Text style={[styles.aboutDesc, { color: theme.colors.textSubtle }]}>
-            用简单、温柔的方式，记录宝宝成长中的每一个小瞬间。
-          </Text>
-        </Card>
       </ScrollView>
     </Screen>
   );
