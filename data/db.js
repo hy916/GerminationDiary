@@ -313,6 +313,93 @@ function normalizeBaby(baby) {
   };
 }
 
+export async function exportAllData() {
+  const babies = await getBabiesFromDb();
+  const recordsByBaby = {};
+
+  for (const baby of babies) {
+    const allRecords = [
+      ...(baby.feedingRecords || []),
+      ...(baby.sleepRecords || []),
+      ...(baby.diaperRecords || []),
+      ...(baby.growthRecords || []),
+      ...(baby.vaccineRecords || []),
+      ...(baby.illnessRecords || []),
+      ...(baby.fetalRecords || []),
+    ];
+
+    recordsByBaby[baby.id] = allRecords;
+  }
+
+  const cleanBabies = babies.map((b) => ({
+    id: b.id,
+    name: b.name,
+    gender: b.gender,
+    birthday: b.birthday,
+    avatar: b.avatar,
+    birthInfo: b.birthInfo,
+    pendingSleepStart: b.pendingSleepStart || '',
+    pendingFeedingStart: b.pendingFeedingStart || '',
+    createdAt: b.createdAt,
+  }));
+
+  return {
+    version: '2.0.0',
+    exportDate: new Date().toISOString(),
+    babies: cleanBabies,
+    records: recordsByBaby,
+  };
+}
+
+export async function importAllData(jsonData) {
+  const { babies = [], records = {} } = jsonData || {};
+  if (!Array.isArray(babies) || babies.length === 0) {
+    throw new Error('导入数据中没有宝宝档案');
+  }
+
+  if (Platform.OS === 'web') {
+    const webBabies = babies.map((b) => normalizeBaby(b));
+    writeWebBabies(webBabies);
+
+    const webRecords = {};
+    for (const babyId of Object.keys(records)) {
+      webRecords[babyId] = (records[babyId] || []).map((r) => ({
+        ...r,
+        module: r.module || r.type || '',
+      }));
+    }
+    writeWebRecords(webRecords);
+    return;
+  }
+
+  await execute('DELETE FROM records;');
+  await execute('DELETE FROM babies;');
+
+  for (const baby of babies) {
+    await upsertBabyToDb({
+      id: baby.id,
+      name: baby.name || '',
+      gender: baby.gender || '女',
+      birthday: baby.birthday || '',
+      avatar: baby.avatar || '',
+      birthInfo: baby.birthInfo || {},
+      pendingSleepStart: baby.pendingSleepStart || '',
+      pendingFeedingStart: baby.pendingFeedingStart || '',
+      createdAt: baby.createdAt || baby.birthday || new Date().toISOString(),
+    });
+  }
+
+  for (const babyId of Object.keys(records)) {
+    const recs = records[babyId] || [];
+    for (const record of recs) {
+      const module = record.module || record.type || '';
+      const id = record.id || `${module}-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
+      const createdAt = record.createdAt || new Date().toISOString();
+      await insertRecordToDb({ babyId, type: module, record: { ...record, id, module, createdAt } });
+    }
+  }
+}
+
 function readWebBabies() {
   if (typeof window === 'undefined') return [];
   const raw = window.localStorage.getItem(STORAGE_KEYS.babies);

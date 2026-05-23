@@ -1,5 +1,8 @@
 import React, { useEffect, useMemo, useState } from 'react';
-import { StyleSheet, View, ActivityIndicator, Alert } from 'react-native';
+import { StyleSheet, View, ActivityIndicator, Alert, Platform } from 'react-native';
+import * as FileSystem from 'expo-file-system';
+import * as Sharing from 'expo-sharing';
+import * as DocumentPicker from 'expo-document-picker';
 import HomeScreen from './screens/HomeScreen';
 import RecordsScreen from './screens/RecordsScreen';
 import MeScreen from './screens/MeScreen';
@@ -11,12 +14,15 @@ import GrowthScreen from './screens/GrowthScreen';
 import VaccineScreen from './screens/VaccineScreen';
 import IllnessScreen from './screens/IllnessScreen';
 import FetalScreen from './screens/FetalScreen';
+import DataBackupScreen from './screens/DataBackupScreen';
 import BottomTabBar from './ui/components/BottomTabBar';
 import { formatDateTimeYYYYMMDDHHmm } from './utils/timeUtils';
 import {
   clearRecordsForBabyFromDb,
   deleteRecordFromDb,
+  exportAllData,
   getBabiesFromDb,
+  importAllData,
   initDb,
   insertRecordToDb,
   updateRecordToDb,
@@ -232,6 +238,116 @@ export default function App() {
     ]);
   };
 
+  const handleExport = async (selectedCategories) => {
+    try {
+      const allData = await exportAllData();
+      const { babies, records } = allData;
+
+      const exportObj = {
+        version: allData.version,
+        exportDate: allData.exportDate,
+        babies: babies.filter((b) => b.id === (selectedBabyId || currentBaby.id)),
+        records: {},
+      };
+
+      const babyId = selectedBabyId || currentBaby.id;
+      const allRecs = records[babyId] || [];
+      const categoryMap = {
+        feeding: 'feedingRecords',
+        sleep: 'sleepRecords',
+        diaper: 'diaperRecords',
+        growth: 'growthRecords',
+        vaccine: 'vaccineRecords',
+        illness: 'illnessRecords',
+        fetal: 'fetalRecords',
+      };
+
+      const filtered = allRecs.filter((r) => {
+        const cat = categoryMap[r.module];
+        return cat ? selectedCategories[cat] : true;
+      });
+
+      exportObj.records[babyId] = filtered;
+
+      const jsonStr = JSON.stringify(exportObj, null, 2);
+      const fileName = `SproutDiary_backup_${new Date().toISOString().slice(0, 10)}.json`;
+      const filePath = `${FileSystem.documentDirectory}${fileName}`;
+
+      await FileSystem.writeAsStringAsync(filePath, jsonStr, {
+        encoding: FileSystem.EncodingType.UTF8,
+      });
+
+      const isAvailable = await Sharing.isAvailableAsync();
+      if (isAvailable) {
+        await Sharing.shareAsync(filePath, {
+          mimeType: 'application/json',
+          dialogTitle: '导出萌芽日记备份',
+          UTI: 'public.json',
+        });
+      } else {
+        Alert.alert('导出成功', `备份文件已保存到：${filePath}`);
+      }
+    } catch (err) {
+      Alert.alert('导出失败', err?.message || String(err));
+    }
+  };
+
+  const handleImport = async () => {
+    try {
+      const result = await DocumentPicker.getDocumentAsync({
+        type: 'application/json',
+        copyToCacheDirectory: true,
+      });
+
+      if (result.canceled) return;
+
+      const file = result.assets?.[0] || result;
+      if (!file?.uri) {
+        Alert.alert('导入失败', '无法读取选择的文件');
+        return;
+      }
+
+      let jsonStr;
+      if (Platform.OS === 'web') {
+        const response = await fetch(file.uri);
+        jsonStr = await response.text();
+      } else {
+        jsonStr = await FileSystem.readAsStringAsync(file.uri, {
+          encoding: FileSystem.EncodingType.UTF8,
+        });
+      }
+
+      const data = JSON.parse(jsonStr);
+
+      if (!data.babies || !data.records) {
+        Alert.alert('导入失败', '无效的备份文件格式');
+        return;
+      }
+
+      Alert.alert(
+        '确认导入',
+        `即将导入 ${data.babies.length} 个宝宝的数据。\n导入将覆盖当前所有数据，是否继续？`,
+        [
+          { text: '取消', style: 'cancel' },
+          {
+            text: '确定导入',
+            onPress: async () => {
+              await importAllData(data);
+              const loaded = await getBabiesFromDb();
+              setBabies(loaded);
+              if (loaded.length && !loaded.some((b) => b.id === selectedBabyId)) {
+                setSelectedBabyId(loaded[0].id);
+              }
+              Alert.alert('导入成功', '数据已成功恢复，请重启应用以确保数据完全加载。');
+            },
+          },
+        ],
+      );
+    } catch (err) {
+      Alert.alert('导入失败', err?.message || String(err));
+    }
+  };
+
   const renderScreen = () => {
     const name = !hasBaby ? 'Profile' : route.name;
     switch (name) {
@@ -309,6 +425,13 @@ export default function App() {
           onAddFetal={(record) => addRecord('fetal', record)}
           onUpdateFetal={(id, record) => updateRecord('fetal', id, record)}
           onDeleteFetal={(id) => deleteRecord('fetal', id)}
+        />;
+      case 'DataBackup':
+        return <DataBackupScreen
+          baby={currentBaby}
+          onBack={goBack}
+          onExport={handleExport}
+          onImport={handleImport}
         />;
       default:
         return <HomeScreen baby={currentBaby} onNavigate={navigate} />;

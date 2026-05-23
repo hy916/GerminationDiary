@@ -27,7 +27,8 @@
       "Bash(xcodebuild -workspace SproutDiary.xcworkspace -scheme SproutDiary -configuration Release -sdk iphoneos -destination 'generic/platform=iOS' CODE_SIGNING_ALLOWED=NO CODE_SIGNING_REQUIRED=NO CODE_SIGN_IDENTITY=\"\" -archivePath /Users/huyi/SproutDiary/ios/build/SproutDiary.xcarchive archive)",
       "Bash(md5 /Users/huyi/SproutDiary/assets/splash-icon.png)",
       "Bash(md5 /Users/huyi/SproutDiary/assets/IMG_20260510_195731.png)",
-      "Bash(sips -z 1024 1024 /Users/huyi/SproutDiary/assets/icon.png --out /Users/huyi/SproutDiary/ios/SproutDiary/Images.xcassets/AppIcon.appiconset/App-Icon-1024x1024@1x.png)"
+      "Bash(sips -z 1024 1024 /Users/huyi/SproutDiary/assets/icon.png --out /Users/huyi/SproutDiary/ios/SproutDiary/Images.xcassets/AppIcon.appiconset/App-Icon-1024x1024@1x.png)",
+      "Bash(node -e \"const p = require\\('./package.json'\\); Object.entries\\(p.dependencies\\).filter\\(\\([k]\\)=>k.includes\\('file-system'\\)||k.includes\\('sharing'\\)||k.includes\\('document-picker'\\)\\).forEach\\(\\([k,v]\\)=>console.log\\(k,v\\)\\)\")"
     ]
   }
 }
