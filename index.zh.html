@@ -79,6 +79,91 @@
         keywords: 萌芽日记
         description: 萌芽日记APP用途在于新手父母在宝宝出生后，需记录大量基础信息、喂养细节、日常状态及生长发育情况，当前多通过纸质笔记、备忘录等方式记录，存在信息零散、查找不便、统计困难、无法直观追踪成长趋势等问题。
         -->
+        <p>#iOS</p>
+        <h2 id="重新编译"><a aria-hidden="true" tabindex="-1" href="#重新编译" class="anchor"><span class="icon icon-link"></span></a>重新编译</h2>
+        <p>cd ios &#x26;&#x26; xcodebuild build<br>-workspace app.xcworkspace<br>-scheme app<br>-configuration Release<br>-sdk iphoneos<br>-destination 'generic/platform=iOS'<br>CODE_SIGNING_ALLOWED=NO</p>
+        <h2 id="重新打包"><a aria-hidden="true" tabindex="-1" href="#重新打包" class="anchor"><span class="icon icon-link"></span></a>重新打包</h2>
+        <p>cd /tmp &#x26;&#x26; rm -rf Payload &#x26;&#x26; mkdir Payload &#x26;&#x26;<br>cp -R ~/Library/Developer/Xcode/DerivedData/app-*/Build/Products/Release-iphoneos/app.app Payload/ &#x26;&#x26;<br>zip -r9 GameHub.ipa Payload/ >/dev/null &#x26;&#x26;<br>mv GameHub.ipa ~/GameHub/</p>
+        <pre><code class="code-highlight"><span class="code-line line-number" line="1">
+</span><span class="code-line line-number" line="2"># 快捷变更版本号
+</span><span class="code-line line-number" line="3">
+</span><span class="code-line line-number" line="4">## 统一用脚本自动改版本
+</span><span class="code-line line-number" line="5">
+</span><span class="code-line line-number" line="6">```txt
+</span><span class="code-line line-number" line="7">发版前：
+</span><span class="code-line line-number" line="8">自动同时修改：
+</span><span class="code-line line-number" line="9">
+</span><span class="code-line line-number" line="10">app.json
+</span><span class="code-line line-number" line="11">ios/app/Info.plist
+</span></code><input type="hidden" value="
+# 快捷变更版本号
+
+## 统一用脚本自动改版本
+
+&#x60;&#x60;&#x60;txt
+发版前：
+自动同时修改：
+
+app.json
+ios/app/Info.plist
+"><div onclick="copied(this)" class="copied"><svg class="octicon-copy" aria-hidden="true" viewBox="0 0 16 16" fill="currentColor" height="12" width="12"><path fill-rule="evenodd" d="M0 6.75C0 5.784.784 5 1.75 5h1.5a.75.75 0 010 1.5h-1.5a.25.25 0 00-.25.25v7.5c0 .138.112.25.25.25h7.5a.25.25 0 00.25-.25v-1.5a.75.75 0 011.5 0v1.5A1.75 1.75 0 019.25 16h-7.5A1.75 1.75 0 010 14.25v-7.5z"></path><path fill-rule="evenodd" d="M5 1.75C5 .784 5.784 0 6.75 0h7.5C15.216 0 16 .784 16 1.75v7.5A1.75 1.75 0 0114.25 11h-7.5A1.75 1.75 0 015 9.25v-7.5zm1.75-.25a.25.25 0 00-.25.25v7.5c0 .138.112.25.25.25h7.5a.25.25 0 00.25-.25v-7.5a.25.25 0 00-.25-.25h-7.5z"></path></svg><svg class="octicon-check" aria-hidden="true" viewBox="0 0 16 16" fill="currentColor" height="12" width="12"><path fill-rule="evenodd" d="M13.78 4.22a.75.75 0 010 1.06l-7.25 7.25a.75.75 0 01-1.06 0L2.22 9.28a.75.75 0 011.06-1.06L6 10.94l6.72-6.72a.75.75 0 011.06 0z"></path></svg></div></pre>
+        <hr>
+        <h1 id="做一个-releasesh"><a aria-hidden="true" tabindex="-1" href="#做一个-releasesh" class="anchor"><span class="icon icon-link"></span></a>做一个 release.sh</h1>
+        <p>例如：</p>
+        <pre class="language-bash"><code class="language-bash code-highlight"><span class="code-line line-number" line="1"><span class="token shebang important">#!/bin/bash</span>
+</span><span class="code-line line-number" line="2">
+</span><span class="code-line line-number" line="3"><span class="token assign-left variable">VERSION</span><span class="token operator">=</span><span class="token variable">$1</span>
+</span><span class="code-line line-number" line="4"><span class="token assign-left variable">BUILD</span><span class="token operator">=</span><span class="token variable">$2</span>
+</span><span class="code-line line-number" line="5">
+</span><span class="code-line line-number" line="6"><span class="token builtin class-name">echo</span> <span class="token string">"Updating to version <span class="token variable">$VERSION</span> (<span class="token variable">$BUILD</span>)"</span>
+</span><span class="code-line line-number" line="7">
+</span><span class="code-line line-number" line="8"><span class="token comment"># app.json</span>
+</span><span class="code-line line-number" line="9"><span class="token function">sed</span> <span class="token parameter variable">-i</span> <span class="token string">''</span> <span class="token string">"s/<span class="token entity" title="\&#x22;">\"</span>version<span class="token entity" title="\&#x22;">\"</span>: <span class="token entity" title="\&#x22;">\"</span>.*<span class="token entity" title="\&#x22;">\"</span>/<span class="token entity" title="\&#x22;">\"</span>version<span class="token entity" title="\&#x22;">\"</span>: <span class="token entity" title="\&#x22;">\"</span><span class="token variable">$VERSION</span><span class="token entity" title="\&#x22;">\"</span>/"</span> app.json
+</span><span class="code-line line-number" line="10"><span class="token function">sed</span> <span class="token parameter variable">-i</span> <span class="token string">''</span> <span class="token string">"s/<span class="token entity" title="\&#x22;">\"</span>versionCode<span class="token entity" title="\&#x22;">\"</span>: [0-9]*/<span class="token entity" title="\&#x22;">\"</span>versionCode<span class="token entity" title="\&#x22;">\"</span>: <span class="token variable">$BUILD</span>/"</span> app.json
+</span><span class="code-line line-number" line="11"><span class="token function">sed</span> <span class="token parameter variable">-i</span> <span class="token string">''</span> <span class="token string">"s/<span class="token entity" title="\&#x22;">\"</span>buildNumber<span class="token entity" title="\&#x22;">\"</span>: <span class="token entity" title="\&#x22;">\"</span>.*<span class="token entity" title="\&#x22;">\"</span>/<span class="token entity" title="\&#x22;">\"</span>buildNumber<span class="token entity" title="\&#x22;">\"</span>: <span class="token entity" title="\&#x22;">\"</span><span class="token variable">$BUILD</span><span class="token entity" title="\&#x22;">\"</span>/"</span> app.json
+</span><span class="code-line line-number" line="12">
+</span><span class="code-line line-number" line="13"><span class="token comment"># iOS plist</span>
+</span><span class="code-line line-number" line="14">/usr/libexec/PlistBuddy <span class="token parameter variable">-c</span> <span class="token string">"Set :CFBundleShortVersionString <span class="token variable">$VERSION</span>"</span> ios/app/Info.plist
+</span><span class="code-line line-number" line="15">/usr/libexec/PlistBuddy <span class="token parameter variable">-c</span> <span class="token string">"Set :CFBundleVersion <span class="token variable">$BUILD</span>"</span> ios/app/Info.plist
+</span><span class="code-line line-number" line="16">
+</span><span class="code-line line-number" line="17"><span class="token builtin class-name">echo</span> <span class="token string">"Done."</span>
+</span></code><input type="hidden" value="#!/bin/bash
+
+VERSION=$1
+BUILD=$2
+
+echo &#x22;Updating to version $VERSION ($BUILD)&#x22;
+
+# app.json
+sed -i &#x27;&#x27; &#x22;s/\&#x22;version\&#x22;: \&#x22;.*\&#x22;/\&#x22;version\&#x22;: \&#x22;$VERSION\&#x22;/&#x22; app.json
+sed -i &#x27;&#x27; &#x22;s/\&#x22;versionCode\&#x22;: [0-9]*/\&#x22;versionCode\&#x22;: $BUILD/&#x22; app.json
+sed -i &#x27;&#x27; &#x22;s/\&#x22;buildNumber\&#x22;: \&#x22;.*\&#x22;/\&#x22;buildNumber\&#x22;: \&#x22;$BUILD\&#x22;/&#x22; app.json
+
+# iOS plist
+/usr/libexec/PlistBuddy -c &#x22;Set :CFBundleShortVersionString $VERSION&#x22; ios/app/Info.plist
+/usr/libexec/PlistBuddy -c &#x22;Set :CFBundleVersion $BUILD&#x22; ios/app/Info.plist
+
+echo &#x22;Done.&#x22;
+"><div onclick="copied(this)" class="copied"><svg class="octicon-copy" aria-hidden="true" viewBox="0 0 16 16" fill="currentColor" height="12" width="12"><path fill-rule="evenodd" d="M0 6.75C0 5.784.784 5 1.75 5h1.5a.75.75 0 010 1.5h-1.5a.25.25 0 00-.25.25v7.5c0 .138.112.25.25.25h7.5a.25.25 0 00.25-.25v-1.5a.75.75 0 011.5 0v1.5A1.75 1.75 0 019.25 16h-7.5A1.75 1.75 0 010 14.25v-7.5z"></path><path fill-rule="evenodd" d="M5 1.75C5 .784 5.784 0 6.75 0h7.5C15.216 0 16 .784 16 1.75v7.5A1.75 1.75 0 0114.25 11h-7.5A1.75 1.75 0 015 9.25v-7.5zm1.75-.25a.25.25 0 00-.25.25v7.5c0 .138.112.25.25.25h7.5a.25.25 0 00.25-.25v-7.5a.25.25 0 00-.25-.25h-7.5z"></path></svg><svg class="octicon-check" aria-hidden="true" viewBox="0 0 16 16" fill="currentColor" height="12" width="12"><path fill-rule="evenodd" d="M13.78 4.22a.75.75 0 010 1.06l-7.25 7.25a.75.75 0 01-1.06 0L2.22 9.28a.75.75 0 011.06-1.06L6 10.94l6.72-6.72a.75.75 0 011.06 0z"></path></svg></div></pre>
+        <hr>
+        <h1 id="使用方式"><a aria-hidden="true" tabindex="-1" href="#使用方式" class="anchor"><span class="icon icon-link"></span></a>使用方式</h1>
+        <pre class="language-bash"><code class="language-bash code-highlight"><span class="code-line line-number" line="1">./release.sh <span class="token number">2.0</span>.0 <span class="token number">12</span>
+</span></code><input type="hidden" value="./release.sh 2.0.0 12
+"><div onclick="copied(this)" class="copied"><svg class="octicon-copy" aria-hidden="true" viewBox="0 0 16 16" fill="currentColor" height="12" width="12"><path fill-rule="evenodd" d="M0 6.75C0 5.784.784 5 1.75 5h1.5a.75.75 0 010 1.5h-1.5a.25.25 0 00-.25.25v7.5c0 .138.112.25.25.25h7.5a.25.25 0 00.25-.25v-1.5a.75.75 0 011.5 0v1.5A1.75 1.75 0 019.25 16h-7.5A1.75 1.75 0 010 14.25v-7.5z"></path><path fill-rule="evenodd" d="M5 1.75C5 .784 5.784 0 6.75 0h7.5C15.216 0 16 .784 16 1.75v7.5A1.75 1.75 0 0114.25 11h-7.5A1.75 1.75 0 015 9.25v-7.5zm1.75-.25a.25.25 0 00-.25.25v7.5c0 .138.112.25.25.25h7.5a.25.25 0 00.25-.25v-7.5a.25.25 0 00-.25-.25h-7.5z"></path></svg><svg class="octicon-check" aria-hidden="true" viewBox="0 0 16 16" fill="currentColor" height="12" width="12"><path fill-rule="evenodd" d="M13.78 4.22a.75.75 0 010 1.06l-7.25 7.25a.75.75 0 01-1.06 0L2.22 9.28a.75.75 0 011.06-1.06L6 10.94l6.72-6.72a.75.75 0 011.06 0z"></path></svg></div></pre>
+        <p>自动：</p>
+        <h2 id="android"><a aria-hidden="true" tabindex="-1" href="#android" class="anchor"><span class="icon icon-link"></span></a>Android</h2>
+        <pre class="language-txt"><code class="language-txt code-highlight"><span class="code-line line-number" line="1">version: 2.0.0
+</span><span class="code-line line-number" line="2">versionCode: 12
+</span></code><input type="hidden" value="version: 2.0.0
+versionCode: 12
+"><div onclick="copied(this)" class="copied"><svg class="octicon-copy" aria-hidden="true" viewBox="0 0 16 16" fill="currentColor" height="12" width="12"><path fill-rule="evenodd" d="M0 6.75C0 5.784.784 5 1.75 5h1.5a.75.75 0 010 1.5h-1.5a.25.25 0 00-.25.25v7.5c0 .138.112.25.25.25h7.5a.25.25 0 00.25-.25v-1.5a.75.75 0 011.5 0v1.5A1.75 1.75 0 019.25 16h-7.5A1.75 1.75 0 010 14.25v-7.5z"></path><path fill-rule="evenodd" d="M5 1.75C5 .784 5.784 0 6.75 0h7.5C15.216 0 16 .784 16 1.75v7.5A1.75 1.75 0 0114.25 11h-7.5A1.75 1.75 0 015 9.25v-7.5zm1.75-.25a.25.25 0 00-.25.25v7.5c0 .138.112.25.25.25h7.5a.25.25 0 00.25-.25v-7.5a.25.25 0 00-.25-.25h-7.5z"></path></svg><svg class="octicon-check" aria-hidden="true" viewBox="0 0 16 16" fill="currentColor" height="12" width="12"><path fill-rule="evenodd" d="M13.78 4.22a.75.75 0 010 1.06l-7.25 7.25a.75.75 0 01-1.06 0L2.22 9.28a.75.75 0 011.06-1.06L6 10.94l6.72-6.72a.75.75 0 011.06 0z"></path></svg></div></pre>
+        <h2 id="ios"><a aria-hidden="true" tabindex="-1" href="#ios" class="anchor"><span class="icon icon-link"></span></a>iOS</h2>
+        <pre class="language-txt"><code class="language-txt code-highlight"><span class="code-line line-number" line="1">CFBundleShortVersionString: 2.0.0
+</span><span class="code-line line-number" line="2">CFBundleVersion: 12
+</span></code><input type="hidden" value="CFBundleShortVersionString: 2.0.0
+CFBundleVersion: 12
+"><div onclick="copied(this)" class="copied"><svg class="octicon-copy" aria-hidden="true" viewBox="0 0 16 16" fill="currentColor" height="12" width="12"><path fill-rule="evenodd" d="M0 6.75C0 5.784.784 5 1.75 5h1.5a.75.75 0 010 1.5h-1.5a.25.25 0 00-.25.25v7.5c0 .138.112.25.25.25h7.5a.25.25 0 00.25-.25v-1.5a.75.75 0 011.5 0v1.5A1.75 1.75 0 019.25 16h-7.5A1.75 1.75 0 010 14.25v-7.5z"></path><path fill-rule="evenodd" d="M5 1.75C5 .784 5.784 0 6.75 0h7.5C15.216 0 16 .784 16 1.75v7.5A1.75 1.75 0 0114.25 11h-7.5A1.75 1.75 0 015 9.25v-7.5zm1.75-.25a.25.25 0 00-.25.25v7.5c0 .138.112.25.25.25h7.5a.25.25 0 00.25-.25v-7.5a.25.25 0 00-.25-.25h-7.5z"></path></svg><svg class="octicon-check" aria-hidden="true" viewBox="0 0 16 16" fill="currentColor" height="12" width="12"><path fill-rule="evenodd" d="M13.78 4.22a.75.75 0 010 1.06l-7.25 7.25a.75.75 0 01-1.06 0L2.22 9.28a.75.75 0 011.06-1.06L6 10.94l6.72-6.72a.75.75 0 011.06 0z"></path></svg></div></pre>
+        <hr>
       </markdown-style>
     </div>
     <script src="js/demo-preview.js?v=1.34.4"></script>
