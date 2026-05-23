@@ -75,22 +75,37 @@ keywords: 萌芽日记
 description: 萌芽日记APP用途在于新手父母在宝宝出生后，需记录大量基础信息、喂养细节、日常状态及生长发育情况，当前多通过纸质笔记、备忘录等方式记录，存在信息零散、查找不便、统计困难、无法直观追踪成长趋势等问题。
 -->
 
+## 构建
 
-#iOS
+```bash
+# Android
+## APK
+eas build --platform android --profile android-dev
+
+#上架正式版
+eas build --platform android --profile production
+
+# iOS
 ## 重新编译
 cd ios && xcodebuild build \
-  -workspace app.xcworkspace \
-  -scheme app \
+  -workspace SproutDiary.xcworkspace \
+  -scheme SproutDiary \
   -configuration Release \
   -sdk iphoneos \
   -destination 'generic/platform=iOS' \
   CODE_SIGNING_ALLOWED=NO
 
-## 重新打包
-cd /tmp && rm -rf Payload && mkdir Payload && \
-cp -R ~/Library/Developer/Xcode/DerivedData/app-*/Build/Products/Release-iphoneos/app.app Payload/ && \
-zip -r9 GameHub.ipa Payload/ >/dev/null && \
-mv GameHub.ipa ~/GameHub/
+
+cd /tmp
+rm -rf Payload SproutDiary.ipa
+mkdir -p Payload
+
+cp -R ~/Library/Developer/Xcode/DerivedData/SproutDiary-*/Build/Products/Release-iphoneos/app.app ./Payload/
+
+mv ./Payload/app.app ./Payload/SproutDiary.app
+
+zip -r9 SproutDiary.ipa Payload/ >/dev/null
+mv SproutDiary.ipa ~/SproutDiary/
 ```
 
 # 快捷变更版本号
@@ -125,8 +140,8 @@ sed -i '' "s/\"versionCode\": [0-9]*/\"versionCode\": $BUILD/" app.json
 sed -i '' "s/\"buildNumber\": \".*\"/\"buildNumber\": \"$BUILD\"/" app.json
 
 # iOS plist
-/usr/libexec/PlistBuddy -c "Set :CFBundleShortVersionString $VERSION" ios/app/Info.plist
-/usr/libexec/PlistBuddy -c "Set :CFBundleVersion $BUILD" ios/app/Info.plist
+/usr/libexec/PlistBuddy -c "Set :CFBundleShortVersionString $VERSION" ios/SproutDiary/Info.plist
+/usr/libexec/PlistBuddy -c "Set :CFBundleVersion $BUILD" ios/SproutDiary/Info.plist
 
 echo "Done."
 ```

@@ -13,6 +13,7 @@
       "backgroundColor": "#F8E8E0"
     },
     "ios": {
+            "buildNumber": "6",
       "supportsTablet": true,
       "bundleIdentifier": "com.sproutdiary.app",
       "infoPlist": {
@@ -20,6 +21,7 @@
       }
     },
     "android": {
+            "versionCode": 6,
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#ffffff"
